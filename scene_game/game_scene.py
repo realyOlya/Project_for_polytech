@@ -8,6 +8,7 @@ from game_logic.validator import ActionValidator
 from game_logic.scoring import ErrorCounter
 from game_logic.confirmation_handler import ConfirmationHandler
 from ui.dialog_box import DialogBox
+from ui.input_box import InputBox
 
 
 class GameScene(Scene):
@@ -21,6 +22,10 @@ class GameScene(Scene):
             self.items = json.load(f)
         with open(self.DATA_DIR / "image.json", "r", encoding="utf-8") as f:
             self.image_data = json.load(f)
+
+            # Загружаем инструкцию
+        with open(self.DATA_DIR / "start_info.json", "r", encoding="utf-8") as f:
+            self.info_data = json.load(f)
 
         self.validator = ActionValidator("data/scenarios.json")
         self.error_counter = ErrorCounter()
@@ -42,7 +47,12 @@ class GameScene(Scene):
         self.font_medium = pygame.font.SysFont("arial", 24)
         self.font_small = pygame.font.SysFont("arial", 18)
 
+        # Создаем поле ввода (центрируем по экрану)
+        self.name_input = InputBox((SCREEN_WIDTH - 300) // 2, 450, 300, 50, self.font_medium)
+
         self.load_step(self.current_step)
+
+
 
     def load_step(self, step_id):
         self.current_step = step_id
@@ -152,13 +162,22 @@ class GameScene(Scene):
 
     def handle_event(self, event):
         if self.confirmation.is_waiting: return
+
+        # Обработка ввода текста на нужном шаге
+        if self.current_step == "0.1":
+            self.name_input.handle_event(event)
+
         if self.waiting_for_next:
-            if self.next_button.handle_event(event): self.next_step()
-            return
-        if self.is_error:
-            if self.retry_button.handle_event(event): self.load_step(self.current_step)
+            if self.next_button.handle_event(event):
+                self.next_step()
             return
 
+        if self.is_error:
+            if self.retry_button.handle_event(event):
+                self.load_step(self.current_step)
+            return
+
+        # Зоны клика и кнопки
         for zone in self.click_zones:
             if zone.handle_event(event):
                 self.check_answer(None, zone.action_id)
@@ -178,11 +197,22 @@ class GameScene(Scene):
 
     def check_answer(self, idx, text):
         if self.validator.validate(self.current_step, text):
-            # ТОТ САМЫЙ МОМЕНТ: если это вступление, переходим сразу
+            # Мгновенный переход для вступления (0) и ввода имени (0.1)
             if self.current_step in ["0", "0.1"]:
-                self.next_step()
-                return # Выходим, чтобы не ставить waiting_for_next = True
+                if self.current_step == "0.1":
+                    player_name = self.name_input.text.strip()
+                    if not player_name:
+                        self.name_input.is_error = True
+                        return  # Не даем нажать, если имя пустое
 
+                    # Сохраняем имя и сразу идем к игре
+                    self.name_input.is_error = False
+                    self.state_manager.progress["player_name"] = player_name
+
+                self.next_step()
+                return
+
+            # Для всех остальных шагов оставляем старую логику с кнопкой "Далее"
             if idx is not None:
                 self.option_buttons[idx].status = "correct"
             self.waiting_for_next = True
@@ -192,10 +222,13 @@ class GameScene(Scene):
             if idx is not None:
                 self.option_buttons[idx].status = "wrong"
 
+
+
     def update(self, dt):
         pass
 
     def draw(self, screen):
+        # 1. Отрисовка фона и персонажа
         if self.bg_image:
             screen.blit(self.bg_image, (0, 0))
             if self.extra_image:
@@ -205,30 +238,71 @@ class GameScene(Scene):
                 hero_rect_w, hero_rect_h, hero_rect_x, hero_rect_y = 320, 660, 50, 40
                 pygame.draw.rect(screen, (255, 255, 255), (hero_rect_x, hero_rect_y, hero_rect_w, hero_rect_h),
                                  border_radius=20)
-
                 target_h = int(hero_rect_h * 0.95)
                 aspect_ratio = self.char_image.get_width() / self.char_image.get_height()
                 target_w = int(target_h * aspect_ratio)
                 scaled_char = pygame.transform.smoothscale(self.char_image, (target_w, target_h))
-
                 screen.blit(scaled_char,
                             (hero_rect_x + (hero_rect_w - target_w) // 2, hero_rect_y + (hero_rect_h - target_h) // 2))
 
-            # Отрисовка вопроса через класс кнопки (узкая плашка)
+            # --- БЛОК ИНСТРУКЦИИ (ШАГ 0.1) ---
+            if self.current_step == "0.1":
+                # Затемнение заднего плана
+                overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+                overlay.fill((0, 0, 0, 180))
+                screen.blit(overlay, (0, 0))
+
+                # Окно инструкции
+                box_w, box_h = 750, 520
+                box_x, box_y = (SCREEN_WIDTH - box_w) // 2, (SCREEN_HEIGHT - box_h) // 2
+                pygame.draw.rect(screen, (255, 255, 255), (box_x, box_y, box_w, box_h), border_radius=20)
+
+                # 1. Заголовок
+                title = self.info_data["tutorial"]["title"]
+                title_surf = self.font_medium.render(title, True, (0, 0, 0))
+                screen.blit(title_surf, ((SCREEN_WIDTH - title_surf.get_width()) // 2, box_y + 30))
+
+                # 2. ЦИКЛ ОТРИСОВКИ ТЕКСТА (пункты 1-4)
+                y_text = box_y + 100
+                for line in self.info_data["tutorial"]["text"]:
+                    line_surf = self.font_small.render(line, True, (40, 40, 40))
+                    screen.blit(line_surf, (box_x + 40, y_text))
+                    y_text += 40  # Расстояние между строками
+
+                # 3. Управление (controls)
+                controls_text = self.info_data.get("tutorial", {}).get("controls", "")
+                if controls_text:
+                    ctrl_surf = self.font_small.render(controls_text, True, (100, 100, 100))
+                    screen.blit(ctrl_surf, (box_x + 40, y_text + 10))
+
+                # 4. Поле ввода имени
+                prompt_surf = self.font_small.render("Введите ваше имя:", True, (0, 0, 0))
+                screen.blit(prompt_surf, ((SCREEN_WIDTH - prompt_surf.get_width()) // 2, box_y + 360))
+
+                # Привязываем координаты InputBox к нашему окну
+                self.name_input.rect.x = (SCREEN_WIDTH - self.name_input.rect.width) // 2
+                self.name_input.rect.y = box_y + 390
+                self.name_input.draw(screen)
+            # --- КОНЕЦ БЛОКА ИНСТРУКЦИИ ---
+
             if self.question_button:
                 self.question_button.draw(screen)
         else:
+            # Если нет фона
             screen.fill((240, 240, 255))
             if self.question_button:
-                # В обычном режиме центрируем вопрос сверху
                 self.question_button.rect.x = (SCREEN_WIDTH - self.question_button.rect.width) // 2
                 self.question_button.rect.y = 100
                 self.question_button.draw(screen)
 
+        # Отрисовка счетчика ошибок
         err_text = self.font_small.render(f"Ошибок: {self.error_counter.count}", True, (231, 76, 60))
         screen.blit(err_text, (SCREEN_WIDTH - 120, 20))
 
-        for btn in self.option_buttons: btn.draw(screen)
+        # Отрисовка кнопок ответов и управления
+        for btn in self.option_buttons:
+            btn.draw(screen)
+
         if self.waiting_for_next:
             self.next_button.draw(screen)
         elif self.is_error:
