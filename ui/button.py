@@ -62,3 +62,8 @@ class Button:
     def set_wrong(self):
         self.status = 'wrong'
         self.wrong_timer = time.time()
+
+    def reset(self):
+        self.status = None
+        self.is_hovered = False
+        self.wrong_timer = 0
