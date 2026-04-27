@@ -113,7 +113,6 @@ class GameScene(Scene):
                     self.extra_image = pygame.image.load(str(ext_path))
                     self.extra_image_pos = ext_data["pos"]
 
-
             # Зоны клика (координаты относительно области персонажа)
             hx, hy, hw, hh = self.hero_rect      # (50, 40, 320, 660)
             for item in visuals.get("items_to_click", []):
@@ -122,7 +121,6 @@ class GameScene(Scene):
                 zone.action_id = item["id"]
                 zone.is_correct = False
                 self.click_zones.append(zone)
-
 
         except Exception as e:
             print(f"Ошибка загрузки ресурсов: {e}")
@@ -171,8 +169,23 @@ class GameScene(Scene):
             "3": self.items.get("hats", []),
             "4": self.items.get("jewerly", []),  # сюда не попадём из-за проверки выше
             "5": self.items.get("handwashing", []),
+            "6_1": self.items.get("meat", []),
+            "6_2": self.items.get("vegetables", []),
+            "6_3": self.items.get("cereal", []),
             "7": ["Перейти в цех"],
-            "17": ["Подать суп на бракераж"]
+            "8": self.items.get("workshop", []),
+            "9": self.items.get("meat_workshop", []),
+            "10": self.items.get("workshop", []),
+            "11": self.items.get("vegetables_workshop", []),
+            "12_1": self.items.get("cuts", []),
+            "12_2": self.items.get("cuts", []),
+            "12_3": self.items.get("cuts", []),
+            "12_4": self.items.get("cuts", []),
+            "13": self.items.get("workshop", []),
+            "14": self.items.get("dishes", []),
+            "16": self.items.get("temperature", []),
+            "17": ["Подать суп на бракераж"],
+            "18": self.items.get("cleaning", []),
         }
         return options_map.get(step_id, ["Далее"])
 
