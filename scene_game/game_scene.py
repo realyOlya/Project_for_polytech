@@ -35,11 +35,20 @@ class GameScene(Scene):
         self.total_items_to_collect = 0
         self.checkmark_img = None
 
+        self.multi_select_mode = False
+        self.selected_options = set()  # индексы выбранных опций
+        self.waiting_for_next = False
+
         # Порядок сцен (включая вступление)
+        # self.steps_order = [
+        #     '0', '0.1', '1', '2', '3', '4', '5', '6_1', '6_2', '6_3',
+        #     '7', '8', '9', '10', '11', '12_1', '12_2', '12_3', '12_4',
+        #     '13', '14', '15', '16', '17', '18'
+        # ]
         self.steps_order = [
-            '0', '0.1', '1', '2', '3', '4', '5', '6_1', '6_2', '6_3',
-            '7', '8', '9', '10', '11', '12_1', '12_2', '12_3', '12_4',
-            '13', '14', '15', '16', '17', '18'
+            '0', '0.1', '1', '2', '3', '4', '6_1', '6_2', '6_3',
+            '7', '8', '9', '10', '12_1', '12_2', '12_3', '12_4',
+            '13', '14', '16', '17', '18'
         ]
         self.step_index = 0
         self.current_step = self.steps_order[0]
@@ -49,6 +58,7 @@ class GameScene(Scene):
         self.extra_image = None
         self.extra_image_pos = (0, 0)
         self.click_zones = []
+        self.option_buttons = []
         self.question_button = None
 
         self.waiting_for_next = False
@@ -59,6 +69,12 @@ class GameScene(Scene):
 
         self.name_input = InputBox((SCREEN_WIDTH - 300) // 2, 450, 300, 50, self.font_medium)
 
+        self.current_question = ""
+        self.next_button = None
+
+        self.final_button = None
+        self.showing_results = False
+
         # Загрузка изображения галочки
         try:
             check_path = self.DATA_DIR / "images" / "scene_4" / "галочка.png"
@@ -68,21 +84,23 @@ class GameScene(Scene):
             print(f"Ошибка загрузки галочка.png: {e}")
             self.checkmark_img = None
 
-        self.load_step(self.current_step)
-
         self.hero_rect = (50, 40, 320, 660)
+        self.load_step(self.current_step)
 
     def load_step(self, step_id):
         self.current_step = step_id
         self.waiting_for_next = False
         self.is_error = False
         self.click_zones = []
+        self.option_buttons = []
         self.bg_image = None
         self.char_image = None
         self.extra_image = None
         self.question_button = None
         self.correct_count = 0
         self.total_items_to_collect = 0
+        self.multi_select_mode = False
+        self.selected_options.clear()
 
         step_data = self.validator.get_step(step_id)
         if not step_data:
@@ -90,6 +108,9 @@ class GameScene(Scene):
             return
 
         visuals = self.image_data.get(step_id, {})
+
+        self.final_button = None
+        self.showing_results = False
 
         try:
             # Фон
@@ -132,6 +153,13 @@ class GameScene(Scene):
         else:
             # Обычные текстовые варианты
             options = self._get_options_for_step(step_id)
+
+            correct = step_data.get("correct")
+            self.multi_select_mode = isinstance(correct, list)
+            if self.multi_select_mode:
+                # Для множественного выбора показываем все кнопки как чекбоксы
+                self.total_items_to_collect = len(options)
+
             custom_buttons_pos = visuals.get("buttons_pos", None)
             default_pos = visuals.get("options_pos", [(SCREEN_WIDTH - 500) // 2, 250])
             start_x, start_y = default_pos[0], default_pos[1]
@@ -205,7 +233,7 @@ class GameScene(Scene):
 
     def _create_control_buttons(self):
         # Для сцен с предметами используем кнопку "ПРОВЕРИТЬ", иначе "ДАЛЕЕ"
-        if self.total_items_to_collect > 0:
+        if self.total_items_to_collect > 0 or self.multi_select_mode:
             btn_text = "ПРОВЕРИТЬ"
             btn_width = 250
         else:
@@ -235,6 +263,21 @@ class GameScene(Scene):
                 self.load_step(self.current_step)
             return
 
+        if self.multi_select_mode:
+            if self.next_button and self.next_button.handle_event(event):
+                self.check_multi_select()
+                return
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                for i, btn in enumerate(self.option_buttons):
+                    if btn.rect.collidepoint(event.pos):
+                        if i in self.selected_options:
+                            self.selected_options.remove(i)
+                            btn.status = "normal"  # "не выбрано"
+                        else:
+                            self.selected_options.add(i)
+                            btn.status = "correct"  # подсвечиваем как выбранное
+                        return
+
         # Множественный выбор предметов (зоны клика)
         if self.total_items_to_collect > 0:
             # Прямая проверка попадания мыши в зону (без callback)
@@ -256,6 +299,38 @@ class GameScene(Scene):
             if btn.handle_event(event):
                 self.check_answer(i, btn.text)
                 break
+
+        if self.final_button and self.final_button.handle_event(event):
+            self.showing_results = True
+            return
+
+        if self.showing_results:
+            # По любому клику или нажатию клавиши закрываем игру (или перезапускаем)
+            if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN:
+                self.show_end_screen()  # или заменить на self.running = False
+            return
+
+    def check_multi_select(self):
+        """Проверка множественного выбора"""
+        selected_texts = [self.option_buttons[i].text for i in self.selected_options]
+        if self.validator.validate(self.current_step, selected_texts):
+            if self.current_step == "18":
+                self.multi_select_mode = False
+                self.total_items_to_collect = 0
+                self.option_buttons = []
+                self.final_button = Button(
+                    (SCREEN_WIDTH - 250) // 2, 620, 250, 50,
+                    "ПОДВЕСТИ ИТОГИ", None
+                )
+            else:
+                self.waiting_for_next = True
+                self.multi_select_mode = False
+                self.total_items_to_collect = 0
+                self.option_buttons = []
+                self._create_control_buttons()
+        else:
+            self.is_error = True
+            self.error_counter.add_error()
 
     def check_answer(self, idx, text):
         if self.validator.validate(self.current_step, text):
@@ -399,7 +474,8 @@ class GameScene(Scene):
         screen.blit(err_text, (SCREEN_WIDTH - 120, 20))
 
         # Кнопки ответов (если не режим сбора предметов)
-        if not self.total_items_to_collect:
+        if self.option_buttons and not self.final_button and (
+                self.multi_select_mode or not self.total_items_to_collect):
             for btn in self.option_buttons:
                 btn.draw(screen)
 
@@ -410,6 +486,8 @@ class GameScene(Scene):
             self.retry_button.draw(screen)
         elif self.total_items_to_collect > 0:
             self.next_button.draw(screen)
+        if self.final_button:
+            self.final_button.draw(screen)
 
         # Галочки на выбранных зонах
         if self.checkmark_img:
@@ -418,3 +496,32 @@ class GameScene(Scene):
                     x = zone.rect.x + (zone.rect.width - self.checkmark_img.get_width()) // 2
                     y = zone.rect.y + (zone.rect.height - self.checkmark_img.get_height()) // 2
                     screen.blit(self.checkmark_img, (x, y))
+
+        if self.showing_results:
+            # Полупрозрачная подложка
+            overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+            overlay.fill((0, 0, 0, 180))
+            screen.blit(overlay, (0, 0))
+
+            # Белое окно результатов
+            box_w, box_h = 600, 400
+            box_x, box_y = (SCREEN_WIDTH - box_w) // 2, (SCREEN_HEIGHT - box_h) // 2
+            pygame.draw.rect(screen, (255, 255, 255), (box_x, box_y, box_w, box_h), border_radius=20)
+
+            # Имя игрока
+            name = self.state_manager.progress.get("player_name", "Игрок")
+            name_surf = self.font_medium.render(f"Повар: {name}", True, (0, 0, 0))
+            screen.blit(name_surf, (box_x + 50, box_y + 80))
+
+            # Количество ошибок
+            err_count = self.error_counter.count
+            err_surf = self.font_medium.render(f"Допущено ошибок: {err_count}", True, (231, 76, 60))
+            screen.blit(err_surf, (box_x + 50, box_y + 160))
+
+            # Подсказка
+            hint_surf = self.font_small.render("Нажмите любую кнопку мыши, чтобы завершить", True, (100, 100, 100))
+            screen.blit(hint_surf, (box_x + 50, box_y + 280))
+
+    def show_end_screen(self):
+        pygame.quit()
+        exit()
