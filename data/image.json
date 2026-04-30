@@ -2,37 +2,51 @@
   "0": {
     "background": "images/scene_0/вступление.png",
     "buttons_pos": [
-        [390, 610]
+        [390, 630]
     ]
   },
   "0.1": {
     "background": "images/scene_0.1/вступление без текста.png",
-    "extra_image": {
-        "path": "images/scene_0.1/dialod_0.1.jpg",
-        "pos": [200, 100]
-    },
     "buttons_pos": [
-        [390, 610]
+        [390, 630]
     ]
   },
   "1": {
     "background": "images/scene_1/раздевалка.png",
+    "text_rect": [100, 200, 1080, 100],
     "buttons_pos": [
-        [390, 310],
-        [390, 410],
-        [390, 510],
-        [390, 610]
+        [130, 310],
+        [130, 380],
+        [650, 310],
+        [650, 380]
     ]
   },
   "2": {
-    "background": "images/scene_2/раздевалка.png"
+    "background": "images/scene_2/раздевалка.png",
+    "text_rect": [100, 200, 1080, 100],
+    "buttons_pos": [
+        [130, 310],
+        [130, 390],
+        [130, 470],
+        [650, 310],
+        [650, 390],
+        [650, 470]
+    ]
   },
   "3": {
-    "background": "images/scene_3/раздевалка.png"
+    "background": "images/scene_3/раздевалка.png",
+    "text_rect": [100, 200, 1080, 100],
+    "buttons_pos": [
+        [130, 310],
+        [130, 380],
+        [650, 310],
+        [650, 380]
+    ]
   },
   "4": {
     "background": "images/scene_4/раздевалка.png",
     "character": "images/scene_4/повар украшения без фона.png",
+    "text_rect": [400, 250, 750, 100],
     "options_pos": [400, 500],
     "char_pos": [50, 50],
     "items_to_click": [
@@ -44,87 +58,265 @@
     ]
   },
   "5": {
-    "background": "images/scene_5/умывалка.png"
+    "background": "images/scene_5/умывалка.png",
+    "text_rect": [100, 200, 1080, 100],
+    "buttons_pos": [
+        [130, 310],
+        [130, 390],
+        [130, 470],
+        [390, 550],
+        [650, 310],
+        [650, 390],
+        [650, 470]
+    ]
   },
-  "5.1": {
-    "background": "images/scene_5.1/умывалка.png"
+  "5_1": {
+    "background": "images/scene_5.1/умывалка.png",
+    "text_rect": [400, 50, 550, 200],
+    "buttons_pos": [
+        [390, 610]
+    ]
   },
   "6": {
-    "background": "images/scene_6/кладовая.png"
+    "background": "images/scene_6/кладовая.png",
+    "text_rect": [400, 50, 550, 200],
+    "buttons_pos": [
+        [390, 610]
+    ]
   },
   "6.1": {
-    "background": "images/scene_6.1/кладовая.png"
+    "background": "images/scene_6.1/кладовая.png",
+    "text_rect": [100, 200, 1080, 100],
+    "buttons_pos": [
+        [130, 310],
+        [130, 390],
+        [130, 470],
+        [650, 310],
+        [650, 390],
+        [650, 470]
+    ]
   },
   "6.2": {
-    "background": "images/scene_6.2/кладовая.png"
+    "background": "images/scene_6.2/кладовая.png",
+    "text_rect": [100, 200, 1080, 100],
+    "buttons_pos": [
+        [130, 310],
+        [130, 390],
+        [130, 470],
+        [390, 550],
+        [650, 310],
+        [650, 390],
+        [650, 470]
+    ]
   },
   "6.3": {
-    "background": "images/scene_6.3/кладовая.png"
+    "background": "images/scene_6.3/кладовая.png",
+    "text_rect": [100, 200, 1080, 100],
+    "buttons_pos": [
+        [130, 310],
+        [130, 380],
+        [650, 310],
+        [650, 380]
+    ]
   },
   "7": {
-    "background": "images/scene_7/цехи.png"
+    "background": "images/scene_7/цехи.png",
+    "text_rect": [400, 50, 550, 200],
+    "buttons_pos": [
+        [390, 630]
+    ]
   },
   "8": {
-    "background": "images/scene_8/цехи.png"
+    "background": "images/scene_8/цехи.png",
+    "text_rect": [100, 200, 1080, 100],
+    "buttons_pos": [
+        [130, 310],
+        [130, 390],
+        [130, 470],
+        [650, 310],
+        [650, 390],
+        [650, 470]
+    ]
   },
   "8.1": {
-    "background": "images/scene_8.1/цехи.png"
+    "background": "images/scene_8.1/мясной цех.png",
+    "text_rect": [400, 50, 550, 200],
+    "buttons_pos": [
+        [390, 630]
+    ]
   },
   "9": {
-    "background": "images/scene_9/мясной текст.png"
+    "background": "images/scene_9/мясной цех.png",
+    "text_rect": [100, 200, 1080, 100],
+    "buttons_pos": [
+        [130, 310],
+        [130, 390],
+        [130, 470],
+        [390, 550],
+        [650, 310],
+        [650, 390],
+        [650, 470]
+    ]
   },
   "9.1": {
-    "background": "images/scene_9.1/мясной текст.png"
+    "background": "images/scene_9.1/цехи.png",
+    "text_rect": [400, 50, 550, 200],
+    "buttons_pos": [
+        [390, 630]
+    ]
   },
   "10": {
-    "background": "images/scene_10/цехи.png"
+    "background": "images/scene_10/цехи.png",
+    "text_rect": [100, 200, 1080, 100],
+    "buttons_pos": [
+        [130, 310],
+        [130, 390],
+        [130, 470],
+        [650, 310],
+        [650, 390],
+        [650, 470]
+    ]
   },
   "10.1": {
-    "background": "images/scene_10.1/цехи.png"
+    "background": "images/scene_10.1/ножи овощи_resized.png",
+    "text_rect": [400, 50, 550, 200],
+    "buttons_pos": [
+        [390, 630]
+    ]
   },
   "11": {
-    "background": "images/scene_11/ножи овощи.png"
+    "background": "images/scene_11/ножи овощи.png",
+    "text_rect": [100, 200, 1080, 100],
+    "buttons_pos": [
+        [130, 310],
+        [130, 380],
+        [650, 310],
+        [650, 380]
+    ]
   },
-  "12_1": {
-    "background": "images/scene_12_1/ножи овощи.png"
+  "12.1": {
+    "background": "images/scene_12_1/ножи овощи.png",
+    "text_rect": [100, 200, 1080, 100],
+    "buttons_pos": [
+        [130, 310],
+        [130, 390],
+        [130, 470],
+        [650, 310],
+        [650, 390],
+        [650, 470]
+    ]
   },
-  "12_2": {
-    "background": "images/scene_12_2/ножи овощи.png"
+  "12.2": {
+    "background": "images/scene_12_2/ножи овощи.png",
+    "text_rect": [100, 200, 1080, 100],
+    "buttons_pos": [
+        [130, 310],
+        [130, 390],
+        [130, 470],
+        [650, 310],
+        [650, 390],
+        [650, 470]
+    ]
   },
-  "12_3": {
-    "background": "images/scene_12_3/ножи овощи.png"
+  "12.3": {
+    "background": "images/scene_12_3/ножи овощи.png",
+    "text_rect": [100, 200, 1080, 100],
+    "buttons_pos": [
+        [130, 310],
+        [130, 390],
+        [130, 470],
+        [650, 310],
+        [650, 390],
+        [650, 470]
+    ]
   },
-  "12_4": {
-    "background": "images/scene_12_4/цехи.png"
+  "12.4": {
+    "background": "images/scene_12_4/цехи.png",
+    "text_rect": [400, 50, 550, 200],
+    "buttons_pos": [
+        [390, 630]
+    ]
   },
   "13": {
-    "background": "images/scene_13/цехи.png"
+    "background": "images/scene_13/цехи.png",
+    "text_rect": [100, 200, 1080, 100],
+    "buttons_pos": [
+        [130, 310],
+        [130, 390],
+        [130, 470],
+        [650, 310],
+        [650, 390],
+        [650, 470]
+    ]
   },
   "13.1": {
-    "background": "images/scene_13.1/вступление без текста.png"
+    "background": "images/scene_13.1/горячий цех.png",
+    "text_rect": [400, 50, 550, 200],
+    "buttons_pos": [
+        [390, 630]
+    ]
   },
   "14": {
-    "background": "images/scene_14/горячий.png"
+    "background": "images/scene_14/горячий.png",
+    "text_rect": [100, 200, 1080, 100],
+    "buttons_pos": [
+        [130, 310],
+        [130, 380],
+        [650, 310],
+        [650, 380]
+    ]
   },
   "15": {
-    "background": "images/scene_15/горячий.png"
+    "background": "images/scene_15/горячий.png",
+    "text_rect": [400, 50, 550, 200]
   },
   "16": {
-    "background": "images/scene_16/горячий.png"
+    "background": "images/scene_16/горячий.png",
+    "text_rect": [100, 200, 1080, 100],
+    "buttons_pos": [
+        [130, 310],
+        [130, 380],
+        [650, 310],
+        [650, 380]
+    ]
   },
   "16.1": {
-    "background": "images/scene_16.1/бракераж_resized.png"
+    "background": "images/scene_16.1/бракераж_resized.png",
+    "text_rect": [400, 50, 550, 200],
+    "buttons_pos": [
+        [390, 630]
+    ]
   },
   "17": {
-    "background": "images/scene_17/бракераж.png"
+    "background": "images/scene_17/бракераж.png",
+    "text_rect": [400, 50, 550, 200],
+    "buttons_pos": [
+        [390, 430]
+    ]
   },
   "17.1": {
-    "background": "images/scene_17.1/уборка_resized.png"
+    "background": "images/scene_17.1/уборка_resized.png",
+    "text_rect": [400, 50, 550, 200],
+    "buttons_pos": [
+        [390, 630]
+    ]
   },
   "18": {
-    "background": "images/scene_18/уборка.png"
+    "background": "images/scene_18/уборка.png",
+    "text_rect": [100, 200, 1080, 100],
+    "buttons_pos": [
+        [130, 310],
+        [130, 390],
+        [130, 470],
+        [130, 550],
+        [650, 310],
+        [650, 390],
+        [650, 470],
+        [650, 550]
+    ]
   },
   "19": {
-    "background": "images/scene_19/вступление без текста.png"
+    "background": "images/scene_19/вступление без текста.png",
+    "text_rect": [400, 50, 550, 200]
   }
 }
