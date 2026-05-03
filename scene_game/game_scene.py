@@ -25,6 +25,8 @@ class GameScene(Scene):
             self.image_data = json.load(f)
         with open(self.DATA_DIR / "start_info.json", "r", encoding="utf-8") as f:
             self.info_data = json.load(f)
+        with open(self.DATA_DIR / "scene_text.json", "r", encoding="utf-8") as f:
+            self.text = json.load(f)
 
         self.validator = ActionValidator("data/scenarios.json")
         self.error_counter = ErrorCounter()
@@ -46,12 +48,14 @@ class GameScene(Scene):
         #     '13', '14', '15', '16', '17', '18'
         # ]
         self.steps_order = [
-            '0', '0.1', '1', '2', '3', '4', '6_1', '6_2', '6_3',
-            '7', '8', '9', '10', '12_1', '12_2', '12_3', '12_4',
-            '13', '14', '16', '17', '18'
+            '0', '0.1', '1', '2', '3', '4', '5_1', '5', '6', '6.1', '6.2', '6.3',
+            '7', '8', '8.1', '9', '9.1', '10', '10.1', '11', '12.1', '12.2', '12.3', '12.4',
+            '13', '13.1', '14', '15', '16', '17', '18'
         ]
         self.step_index = 0
         self.current_step = self.steps_order[0]
+
+        self.hero_rect = (50, 40, 320, 660)
 
         self.bg_image = None
         self.char_image = None
@@ -65,7 +69,7 @@ class GameScene(Scene):
         self.is_error = False
 
         self.font_medium = pygame.font.SysFont("arial", 24)
-        self.font_small = pygame.font.SysFont("arial", 18)
+        self.font_small = pygame.font.SysFont("arial", 24)
 
         self.name_input = InputBox((SCREEN_WIDTH - 300) // 2, 450, 300, 50, self.font_medium)
 
@@ -84,7 +88,15 @@ class GameScene(Scene):
             print(f"Ошибка загрузки галочка.png: {e}")
             self.checkmark_img = None
 
-        self.hero_rect = (50, 40, 320, 660)
+        self.multi_select_mode = False
+        self.selected_options = set()
+        self.final_button = None
+        self.showing_results = False
+
+        self.option_buttons = []
+        self.current_question = None
+        self.next_button = None
+
         self.load_step(self.current_step)
 
     def load_step(self, step_id):
@@ -101,6 +113,15 @@ class GameScene(Scene):
         self.total_items_to_collect = 0
         self.multi_select_mode = False
         self.selected_options.clear()
+
+        self.multi_select_mode = False
+        self.selected_options = set()
+        self.final_button = None
+        self.showing_results = False
+
+        self.option_buttons = []
+        self.current_question = None
+        self.next_button = None
 
         step_data = self.validator.get_step(step_id)
         if not step_data:
@@ -157,7 +178,6 @@ class GameScene(Scene):
             correct = step_data.get("correct")
             self.multi_select_mode = isinstance(correct, list)
             if self.multi_select_mode:
-                # Для множественного выбора показываем все кнопки как чекбоксы
                 self.total_items_to_collect = len(options)
 
             custom_buttons_pos = visuals.get("buttons_pos", None)
@@ -196,26 +216,68 @@ class GameScene(Scene):
             "2": self.items.get("shoes", []),
             "3": self.items.get("hats", []),
             "4": self.items.get("jewerly", []),  # сюда не попадём из-за проверки выше
+            "5_1":  ["Нажмите, чтобы продолжить"],
             "5": self.items.get("handwashing", []),
-            "6_1": self.items.get("meat", []),
-            "6_2": self.items.get("vegetables", []),
-            "6_3": self.items.get("cereal", []),
-            "7": ["Перейти в цех"],
+            "6": ["Нажмите, чтобы продолжить"],
+            "6.1": self.items.get("meat", []),
+            "6.2": self.items.get("vegetables", []),
+            "6.3": self.items.get("cereal", []),
+            "7": ["Нажмите, чтобы продолжить"],
             "8": self.items.get("workshop", []),
+            "8.1": ["Нажмите, чтобы продолжить"],
             "9": self.items.get("meat_workshop", []),
+            "9.1": ["Нажмите, чтобы продолжить"],
             "10": self.items.get("workshop", []),
+            "10.1": ["Нажмите, чтобы продолжить"],
             "11": self.items.get("vegetables_workshop", []),
-            "12_1": self.items.get("cuts", []),
-            "12_2": self.items.get("cuts", []),
-            "12_3": self.items.get("cuts", []),
-            "12_4": self.items.get("cuts", []),
+            "12.1": self.items.get("cuts", []),
+            "12.2": self.items.get("cuts", []),
+            "12.3": self.items.get("cuts", []),
+            "12.4": ["Нажмите, чтобы продолжить"],
             "13": self.items.get("workshop", []),
+            "13.1": ["Нажмите, чтобы продолжить"],
             "14": self.items.get("dishes", []),
             "16": self.items.get("temperature", []),
             "17": ["Подать суп на бракераж"],
             "18": self.items.get("cleaning", []),
         }
         return options_map.get(step_id, ["Далее"])
+
+    def _get_description_for_step(self, step_id):
+        # Словарь сопоставления ID шага и ключей из scene_text.json
+        descriptions_map = {
+
+            "1": self.text.get("scene_1", ""),
+            "2": self.text.get("scene_2", ""),
+            "3": self.text.get("scene_3", ""),
+            "4": self.text.get("scene_4", ""),
+            "5_1": [],
+            "5": self.text.get("scene_5", ""),
+            "6": [],
+            "6.1": self.text.get("scene_6.1", ""),
+            "6.2": self.text.get("scene_6.2", ""),
+            "6.3": self.text.get("scene_6.3", ""),
+            "7": [],
+            "8": self.text.get("scene_8", ""),
+            "8.1": [],
+            "9": self.text.get("scene_9", ""),
+            "9.1": [],
+            "10": self.text.get("scene_10", ""),
+            "10.1": [],
+            "11": self.text.get("scene_11", ""),
+            "12.1": self.text.get("scene_12.1", ""),
+            "12.2": self.text.get("scene_12.2", ""),
+            "12.3": self.text.get("scene_12.3", ""),
+            "12.4": [],
+            "13": self.text.get("scene_13", ""),
+            "13.1": [],
+            "14": self.text.get("scene_14", ""),
+            "15": self.text.get("scene_15", ""),
+            "16": self.text.get("scene_16", ""),
+            "17": self.text.get("scene_17", ""),
+            "18": self.text.get("scene_18", ""),
+        }
+        return descriptions_map.get(step_id, "")
 
     def _create_option_buttons(self, options, start_x, start_y, custom_positions=None):
         self.option_buttons = []
@@ -244,6 +306,13 @@ class GameScene(Scene):
         self.retry_button = Button((SCREEN_WIDTH - 250) // 2, 620, 250, 50, "ПОПРОБОВАТЬ СНОВА", None)
 
     def handle_event(self, event):
+        # ОБЯЗАТЕЛЬНО ПОТОМ УДАЛИТЬ
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_n:
+                self.next_step()
+                return
+        #
+
         if self.confirmation.is_waiting:
             return
 
@@ -279,6 +348,22 @@ class GameScene(Scene):
                         return
 
         # Множественный выбор предметов (зоны клика)
+
+        if self.multi_select_mode:
+            if self.next_button and self.next_button.handle_event(event):
+                self.check_multi_select()
+                return
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                for i, btn in enumerate(self.option_buttons):
+                    if btn.rect.collidepoint(event.pos):
+                        if i in self.selected_options:
+                            self.selected_options.remove(i)
+                            btn.status = "normal"
+                        else:
+                            self.selected_options.add(i)
+                            btn.status = "correct"
+                        return
+
         if self.total_items_to_collect > 0:
             # Прямая проверка попадания мыши в зону (без callback)
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -305,37 +390,14 @@ class GameScene(Scene):
             return
 
         if self.showing_results:
-            # По любому клику или нажатию клавиши закрываем игру (или перезапускаем)
             if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN:
-                self.show_end_screen()  # или заменить на self.running = False
+                self.show_end_screen()
             return
-
-    def check_multi_select(self):
-        """Проверка множественного выбора"""
-        selected_texts = [self.option_buttons[i].text for i in self.selected_options]
-        if self.validator.validate(self.current_step, selected_texts):
-            if self.current_step == "18":
-                self.multi_select_mode = False
-                self.total_items_to_collect = 0
-                self.option_buttons = []
-                self.final_button = Button(
-                    (SCREEN_WIDTH - 250) // 2, 620, 250, 50,
-                    "ПОДВЕСТИ ИТОГИ", None
-                )
-            else:
-                self.waiting_for_next = True
-                self.multi_select_mode = False
-                self.total_items_to_collect = 0
-                self.option_buttons = []
-                self._create_control_buttons()
-        else:
-            self.is_error = True
-            self.error_counter.add_error()
 
     def check_answer(self, idx, text):
         if self.validator.validate(self.current_step, text):
             # Мгновенный переход для вступления
-            if self.current_step in ["0", "0.1"]:
+            if self.current_step in ["0", "0.1", "5_1", "6", "7", "8.1", "9.1", "10.1", "12.4", "13.1"]:
                 if self.current_step == "0.1":
                     player_name = self.name_input.text.strip()
                     if not player_name:
@@ -400,6 +462,39 @@ class GameScene(Scene):
     def update(self, dt):
         pass
 
+    def draw_description_block(self, screen, text, rect_coords, font):
+        """
+        rect_coords: (x, y, ширина, высота)
+        """
+        # Отрисовка подложки (как в инструкции шага 0.1)
+        pygame.draw.rect(screen, (255, 255, 255), rect_coords, border_radius=15)
+        pygame.draw.rect(screen, (0, 0, 0), rect_coords, 2, border_radius=15)
+
+        x, y, w, h = rect_coords
+        padding = 20
+        current_y = y + padding
+        max_w = w - (padding * 2)
+
+        # Обработка \n и автоматический перенос
+        paragraphs = text.split('\n')
+        for paragraph in paragraphs:
+            words = paragraph.split(' ')
+            current_line = ""
+            for word in words:
+                test_line = current_line + word + " "
+                if font.size(test_line)[0] < max_w:
+                    current_line = test_line
+                else:
+                    surf = font.render(current_line.strip(), True, (0, 0, 0))
+                    screen.blit(surf, (x + padding, current_y))
+                    current_y += font.get_linesize()
+                    current_line = word + " "
+
+            if current_line:
+                surf = font.render(current_line.strip(), True, (0, 0, 0))
+                screen.blit(surf, (x + padding, current_y))
+                current_y += font.get_linesize()
+
     def draw(self, screen):
         # Фон
         if self.bg_image:
@@ -425,13 +520,27 @@ class GameScene(Scene):
             for zone in self.click_zones:
                 pygame.draw.rect(screen, (0, 0, 0), zone.rect, 2)  # чёрный контур толщиной 2 пикселя
 
+            description_text = self._get_description_for_step(self.current_step)
+            if description_text and self.current_step != "0.1":
+                # 1. Получаем данные о визуале для текущей сцены
+                visuals = self.image_data.get(self.current_step, {})
+
+                # 2. Ищем координаты в JSON. Если их нет, используем дефолтные (400, 50, 500, 150)
+                coords = visuals.get("text_rect", [400, 50, 500, 150])
+
+                # 3. Превращаем список в объект Rect для удобства отрисовки
+                text_rect = pygame.Rect(coords)
+
+                # 4. Рисуем блок
+                self.draw_description_block(screen, description_text, text_rect, self.font_small)
+
             # Окно инструкции для шага 0.1
             if self.current_step == "0.1":
                 overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
                 overlay.fill((0, 0, 0, 180))
                 screen.blit(overlay, (0, 0))
 
-                box_w, box_h = 750, 520
+                box_w, box_h = 920, 520
                 box_x, box_y = (SCREEN_WIDTH - box_w) // 2, (SCREEN_HEIGHT - box_h) // 2
                 pygame.draw.rect(screen, (255, 255, 255), (box_x, box_y, box_w, box_h), border_radius=20)
 
@@ -474,8 +583,7 @@ class GameScene(Scene):
         screen.blit(err_text, (SCREEN_WIDTH - 120, 20))
 
         # Кнопки ответов (если не режим сбора предметов)
-        if self.option_buttons and not self.final_button and (
-                self.multi_select_mode or not self.total_items_to_collect):
+        if self.option_buttons and not self.final_button:
             for btn in self.option_buttons:
                 btn.draw(screen)
 
@@ -497,30 +605,47 @@ class GameScene(Scene):
                     y = zone.rect.y + (zone.rect.height - self.checkmark_img.get_height()) // 2
                     screen.blit(self.checkmark_img, (x, y))
 
+        if self.final_button:
+            self.final_button.draw(screen)
+
         if self.showing_results:
-            # Полупрозрачная подложка
             overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
             overlay.fill((0, 0, 0, 180))
             screen.blit(overlay, (0, 0))
 
-            # Белое окно результатов
             box_w, box_h = 600, 400
             box_x, box_y = (SCREEN_WIDTH - box_w) // 2, (SCREEN_HEIGHT - box_h) // 2
             pygame.draw.rect(screen, (255, 255, 255), (box_x, box_y, box_w, box_h), border_radius=20)
 
-            # Имя игрока
             name = self.state_manager.progress.get("player_name", "Игрок")
             name_surf = self.font_medium.render(f"Повар: {name}", True, (0, 0, 0))
             screen.blit(name_surf, (box_x + 50, box_y + 80))
 
-            # Количество ошибок
             err_count = self.error_counter.count
             err_surf = self.font_medium.render(f"Допущено ошибок: {err_count}", True, (231, 76, 60))
-            screen.blit(err_surf, (box_x + 50, box_y + 160))
-
-            # Подсказка
             hint_surf = self.font_small.render("Нажмите любую кнопку мыши, чтобы завершить", True, (100, 100, 100))
             screen.blit(hint_surf, (box_x + 50, box_y + 280))
+
+    def check_multi_select(self):
+        selected_texts = [self.option_buttons[i].text for i in self.selected_options]
+        if self.validator.validate(self.current_step, selected_texts):
+            if self.current_step == "18":
+                self.multi_select_mode = False
+                self.total_items_to_collect = 0
+                self.option_buttons = []
+                self.final_button = Button(
+                    (SCREEN_WIDTH - 250) // 2, 620, 250, 50,
+                    "ПОДВЕСТИ ИТОГИ", None
+                )
+            else:
+                self.waiting_for_next = True
+                self.multi_select_mode = False
+                self.total_items_to_collect = 0
+                self.option_buttons = []
+                self._create_control_buttons()
+        else:
+            self.is_error = True
+            self.error_counter.add_error()
 
     def show_end_screen(self):
         pygame.quit()
