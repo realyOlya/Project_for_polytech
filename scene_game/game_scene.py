@@ -71,7 +71,24 @@ class GameScene(Scene):
         self.font_medium = pygame.font.SysFont("arial", 24)
         self.font_small = pygame.font.SysFont("arial", 24)
 
-        self.name_input = InputBox((SCREEN_WIDTH - 300) // 2, 450, 300, 50, self.font_medium)
+        # Получаем данные для сцены 0.1
+        scene_cfg = self.image_data.get("0.1", {})
+        # Берем координаты из JSON. Если их там нет, используем 450 как страховку
+        coords = scene_cfg.get("input_pos", [390, 450, 500, 50])
+
+        # Валидатор char.isalpha() разрешает только буквы (русские и английские)
+        # Дополнительно разрешаем пробел, если он нужен в имени
+        self.name_input = InputBox(
+            coords[0], coords[1], coords[2], coords[3],
+            self.font_medium,
+            validator=lambda char: char.isalpha() or char == " "
+        )
+        # В методе __init__ класса GameScene
+        self.sequence_input = None  # Инициализируем пустой переменной
+        self.sequence_label = "Введите правильную последовательность:"
+
+        self.sequence_next_button = None  # Добавьте эту строку
+        self.sequence_input = None
 
         self.current_question = ""
         self.next_button = None
@@ -306,6 +323,15 @@ class GameScene(Scene):
         self.retry_button = Button((SCREEN_WIDTH - 250) // 2, 620, 250, 50, "ПОПРОБОВАТЬ СНОВА", None)
 
     def handle_event(self, event):
+
+        # Если мы на 5-й сцене
+        if self.current_step == "5":
+            if self.sequence_input:
+                self.sequence_input.handle_event(event)
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if self.sequence_next_button and self.sequence_next_button.rect.collidepoint(event.pos):
+                    self.check_sequence_answer()
         # ОБЯЗАТЕЛЬНО ПОТОМ УДАЛИТЬ
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_n:
@@ -458,6 +484,47 @@ class GameScene(Scene):
             self.load_step(self.steps_order[self.step_index])
         else:
             self.show_end_screen()
+            # Сразу после изменения шага проверяем:
+        if self.current_step == "5":
+            self.setup_step_5()
+
+    def setup_step_5(self):
+        # Берем координаты из JSON
+        pos = self.image_data["5"].get("input_pos", [390, 450, 400, 50])
+
+        # Создаем InputBox с валидатором только для цифр
+        self.sequence_input = InputBox(
+            pos[0], pos[1], pos[2], pos[3],
+            self.font_medium,
+            validator=lambda char: char.isdigit()
+        )
+
+        # Создаем кнопку "Далее" рядом (координаты можно взять из JSON или рассчитать)
+        btn_pos = self.image_data["5"].get("next_button_pos", [765, 550])
+        self.sequence_next_button = Button(130, 610, 250, 50, "Далее", None)
+
+    def check_sequence_answer(self):
+        # 1. Получаем правильный ответ. В вашем классе это self.validator.actions
+        # Используем .get("5", {}), чтобы избежать ошибки, если шага "5" нет в JSON
+        step_data = self.validator.actions.get("5", {})
+        correct_answer = step_data.get("correct", "")
+
+        # 2. Получаем ввод пользователя
+        user_answer = self.sequence_input.text.strip()
+
+        # 3. Проверка
+        # Сравниваем как строки. Если нужно игнорировать пробелы, можно добавить .replace(" ", "")
+        if user_answer == str(correct_answer) and user_answer != "":
+            self.sequence_input = None
+            self.sequence_next_button = None
+            self.next_step()
+        else:
+            # Если неверно или пусто — подсвечиваем красным
+            self.sequence_input.is_error = True
+
+            # Увеличиваем счетчик ошибок, если он у вас инициализирован
+            if hasattr(self, 'error_counter'):
+                self.error_counter.add_error()
 
     def update(self, dt):
         pass
@@ -516,22 +583,14 @@ class GameScene(Scene):
                             (hero_rect_x + (hero_rect_w - target_w) // 2,
                              hero_rect_y + (hero_rect_h - target_h) // 2))
 
-            # === НОВОЕ: чёрные контуры вокруг зон клика ===
             for zone in self.click_zones:
-                pygame.draw.rect(screen, (0, 0, 0), zone.rect, 2)  # чёрный контур толщиной 2 пикселя
+                pygame.draw.rect(screen, (0, 0, 0), zone.rect, 2)
 
             description_text = self._get_description_for_step(self.current_step)
             if description_text and self.current_step != "0.1":
-                # 1. Получаем данные о визуале для текущей сцены
                 visuals = self.image_data.get(self.current_step, {})
-
-                # 2. Ищем координаты в JSON. Если их нет, используем дефолтные (400, 50, 500, 150)
                 coords = visuals.get("text_rect", [400, 50, 500, 150])
-
-                # 3. Превращаем список в объект Rect для удобства отрисовки
                 text_rect = pygame.Rect(coords)
-
-                # 4. Рисуем блок
                 self.draw_description_block(screen, description_text, text_rect, self.font_small)
 
             # Окно инструкции для шага 0.1
@@ -559,54 +618,58 @@ class GameScene(Scene):
                     ctrl_surf = self.font_small.render(controls_text, True, (100, 100, 100))
                     screen.blit(ctrl_surf, (box_x + 40, y_text + 10))
 
+                # Текст подсказки перед вводом
                 prompt_surf = self.font_small.render("Введите ваше имя:", True, (0, 0, 0))
-                screen.blit(prompt_surf, ((SCREEN_WIDTH - prompt_surf.get_width()) // 2, box_y + 360))
+                # Центрируем подсказку над полем ввода (по Y берем позицию поля - 30)
+                screen.blit(prompt_surf, ((SCREEN_WIDTH - prompt_surf.get_width()) // 2, self.name_input.rect.y - 30))
 
-                self.name_input.rect.x = (SCREEN_WIDTH - self.name_input.rect.width) // 2
-                self.name_input.rect.y = box_y + 390
+                # УДАЛЕНО: принудительное переопределение self.name_input.rect.y
+                # Теперь отрисовка просто использует те координаты, что заданы в __init__
                 self.name_input.draw(screen)
 
         else:
-            # Нет фона
             screen.fill((240, 240, 255))
             if self.question_button:
                 self.question_button.rect.x = (SCREEN_WIDTH - self.question_button.rect.width) // 2
                 self.question_button.rect.y = 100
                 self.question_button.draw(screen)
 
-        # Вопрос (если есть фон – уже отрисован, но если фон есть, а оверлей инструкции неактивен)
         if self.bg_image and self.question_button and self.current_step != "0.1":
             self.question_button.draw(screen)
 
-        # Счётчик ошибок
+        if self.current_step == "5" and self.sequence_input:
+            # Рисуем подпись
+            label_surf = self.font_small.render(self.sequence_label, True, (0, 0, 0))
+            # Рисуем чуть выше поля ввода
+            screen.blit(label_surf, (self.sequence_input.rect.x, self.sequence_input.rect.y - 30))
+
+            # Рисуем само поле и кнопку
+            self.sequence_input.draw(screen)
+            self.sequence_next_button.draw(screen)
+
         err_text = self.font_small.render(f"Ошибок: {self.error_counter.count}", True, (231, 76, 60))
         screen.blit(err_text, (SCREEN_WIDTH - 120, 20))
 
-        # Кнопки ответов (если не режим сбора предметов)
         if self.option_buttons and not self.final_button:
             for btn in self.option_buttons:
                 btn.draw(screen)
 
-        # Управляющие кнопки
         if self.waiting_for_next:
             self.next_button.draw(screen)
         elif self.is_error:
             self.retry_button.draw(screen)
         elif self.total_items_to_collect > 0:
             self.next_button.draw(screen)
+
         if self.final_button:
             self.final_button.draw(screen)
 
-        # Галочки на выбранных зонах
         if self.checkmark_img:
             for zone in self.click_zones:
                 if zone.is_correct:
                     x = zone.rect.x + (zone.rect.width - self.checkmark_img.get_width()) // 2
                     y = zone.rect.y + (zone.rect.height - self.checkmark_img.get_height()) // 2
                     screen.blit(self.checkmark_img, (x, y))
-
-        if self.final_button:
-            self.final_button.draw(screen)
 
         if self.showing_results:
             overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)

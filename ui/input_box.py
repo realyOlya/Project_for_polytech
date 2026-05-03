@@ -1,37 +1,49 @@
 import pygame
 
+
 class InputBox:
-    def __init__(self, x, y, w, h, font, text=''):
+    def __init__(self, x, y, w, h, font, text='', validator=None):
         self.rect = pygame.Rect(x, y, w, h)
         self.color = pygame.Color('black')
         self.font = font
         self.text = text
         self.txt_surface = self.font.render(text, True, self.color)
         self.active = False
-        self.is_error = False  # Новое свойство для проверки на пустоту
+        self.is_error = False
+        # validator — это функция, которая возвращает True или False
+        self.validator = validator
 
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             self.active = self.rect.collidepoint(event.pos)
             if self.active:
-                self.is_error = False  # Сбрасываем ошибку, когда пользователь начал печатать
+                self.is_error = False
 
         if event.type == pygame.KEYDOWN:
             if self.active:
-                self.is_error = False  # Сбрасываем ошибку при вводе
+                self.is_error = False
+
                 if event.key == pygame.K_BACKSPACE:
                     self.text = self.text[:-1]
+                elif event.key == pygame.K_RETURN:
+                    # Игнорируем Enter, чтобы не добавлять невидимые символы
+                    return
                 else:
+                    # Проверяем: не слишком ли длинный текст И проходит ли символ валидацию
                     if len(self.text) < 15:
-                        self.text += event.unicode
+                        char = event.unicode
+                        # Если валидатор не задан, разрешаем всё.
+                        # Если задан — проверяем конкретный символ.
+                        if self.validator is None or self.validator(char):
+                            self.text += char
+
                 self.txt_surface = self.font.render(self.text, True, self.color)
 
     def draw(self, screen):
         pygame.draw.rect(screen, (255, 255, 255), self.rect, border_radius=10)
 
-        # Выбираем цвет рамки
         if self.is_error:
-            border_color = (231, 76, 60)  # Красный, если нажали "Далее" при пустом поле
+            border_color = (231, 76, 60)
         elif self.active:
             border_color = (100, 100, 100)
         else:
