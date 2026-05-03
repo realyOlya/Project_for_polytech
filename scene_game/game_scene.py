@@ -37,7 +37,16 @@ class GameScene(Scene):
         self.total_items_to_collect = 0
         self.checkmark_img = None
 
+        self.multi_select_mode = False
+        self.selected_options = set()  # индексы выбранных опций
+        self.waiting_for_next = False
+
         # Порядок сцен (включая вступление)
+        # self.steps_order = [
+        #     '0', '0.1', '1', '2', '3', '4', '5', '6_1', '6_2', '6_3',
+        #     '7', '8', '9', '10', '11', '12_1', '12_2', '12_3', '12_4',
+        #     '13', '14', '15', '16', '17', '18'
+        # ]
         self.steps_order = [
             '0', '0.1', '1', '2', '3', '4', '5_1', '5', '6', '6.1', '6.2', '6.3',
             '7', '8', '8.1', '9', '9.1', '10', '10.1', '11', '12.1', '12.2', '12.3', '12.4',
@@ -53,6 +62,7 @@ class GameScene(Scene):
         self.extra_image = None
         self.extra_image_pos = (0, 0)
         self.click_zones = []
+        self.option_buttons = []
         self.question_button = None
 
         self.waiting_for_next = False
@@ -62,6 +72,12 @@ class GameScene(Scene):
         self.font_small = pygame.font.SysFont("arial", 24)
 
         self.name_input = InputBox((SCREEN_WIDTH - 300) // 2, 450, 300, 50, self.font_medium)
+
+        self.current_question = ""
+        self.next_button = None
+
+        self.final_button = None
+        self.showing_results = False
 
         # Загрузка изображения галочки
         try:
@@ -88,12 +104,15 @@ class GameScene(Scene):
         self.waiting_for_next = False
         self.is_error = False
         self.click_zones = []
+        self.option_buttons = []
         self.bg_image = None
         self.char_image = None
         self.extra_image = None
         self.question_button = None
         self.correct_count = 0
         self.total_items_to_collect = 0
+        self.multi_select_mode = False
+        self.selected_options.clear()
 
         self.multi_select_mode = False
         self.selected_options = set()
@@ -110,6 +129,9 @@ class GameScene(Scene):
             return
 
         visuals = self.image_data.get(step_id, {})
+
+        self.final_button = None
+        self.showing_results = False
 
         try:
             # Фон
@@ -309,6 +331,21 @@ class GameScene(Scene):
             if self.retry_button.handle_event(event):
                 self.load_step(self.current_step)
             return
+
+        if self.multi_select_mode:
+            if self.next_button and self.next_button.handle_event(event):
+                self.check_multi_select()
+                return
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                for i, btn in enumerate(self.option_buttons):
+                    if btn.rect.collidepoint(event.pos):
+                        if i in self.selected_options:
+                            self.selected_options.remove(i)
+                            btn.status = "normal"  # "не выбрано"
+                        else:
+                            self.selected_options.add(i)
+                            btn.status = "correct"  # подсвечиваем как выбранное
+                        return
 
         # Множественный выбор предметов (зоны клика)
 
@@ -557,6 +594,8 @@ class GameScene(Scene):
             self.retry_button.draw(screen)
         elif self.total_items_to_collect > 0:
             self.next_button.draw(screen)
+        if self.final_button:
+            self.final_button.draw(screen)
 
         # Галочки на выбранных зонах
         if self.checkmark_img:
