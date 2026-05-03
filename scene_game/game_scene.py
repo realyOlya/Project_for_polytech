@@ -623,6 +623,7 @@ class GameScene(Scene):
 
             err_count = self.error_counter.count
             err_surf = self.font_medium.render(f"Допущено ошибок: {err_count}", True, (231, 76, 60))
+            screen.blit(err_surf, (box_x + 50, box_y + 160))
             hint_surf = self.font_small.render("Нажмите любую кнопку мыши, чтобы завершить", True, (100, 100, 100))
             screen.blit(hint_surf, (box_x + 50, box_y + 280))
 
