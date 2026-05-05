@@ -67,3 +67,17 @@ class Button:
         self.status = None
         self.is_hovered = False
         self.wrong_timer = 0
+
+    def draw_disabled(self, screen):
+        """Рисует кнопку в неактивном состоянии."""
+        # Цвет заливки – похож на наведение, можно настроить
+        bg_color = (180, 180, 180)
+        border_color = (150, 150, 150)
+        text_color = (100, 100, 100)
+
+        pygame.draw.rect(screen, bg_color, self.rect, border_radius=5)
+        pygame.draw.rect(screen, border_color, self.rect, 2, border_radius=5)
+
+        text_surf = self.font.render(self.text, True, text_color)
+        text_rect = text_surf.get_rect(center=self.rect.center)
+        screen.blit(text_surf, text_rect)

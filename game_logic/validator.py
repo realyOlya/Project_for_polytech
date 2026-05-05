@@ -80,3 +80,13 @@ class ActionValidator:
         if isinstance(answer, list):
             return {str(item).strip().lower() for item in answer}
         return set()
+
+    @staticmethod
+    def validate_cooking_sequence(actions: Dict[str, List[str]], expected: Dict[str, List[str]]) -> bool:
+        """Проверяет, что для каждого ингредиента записанные действия совпадают с ожидаемыми."""
+        if set(actions.keys()) != set(expected.keys()):
+            return False
+        for ingr, steps in expected.items():
+            if actions.get(ingr) != steps:
+                return False
+        return True
