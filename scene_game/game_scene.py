@@ -127,6 +127,9 @@ class GameScene(Scene):
         self.current_question = None
         self.next_button = None
 
+        self.sequence_label_text = None
+        self.label_rect = None
+
         self.load_step(self.current_step)
 
         # В конце __init__
@@ -182,7 +185,8 @@ class GameScene(Scene):
                 text_surf = self.font_medium.render(self.current_question, True, (0, 0, 0))
                 qx = (SCREEN_WIDTH - text_surf.get_width() - 40) // 2
                 qy = 50
-                self.question_button = Button(qx, qy, text_surf.get_width()+40, text_surf.get_height()+20, self.current_question, None)
+                self.question_button = Button(qx, qy, text_surf.get_width()+40, text_surf.get_height()+20,
+                                              self.current_question, None)
             return
 
         step_data = self.validator.get_step(step_id)
@@ -420,9 +424,7 @@ class GameScene(Scene):
                         return  # Просто выходим, не вызывая check_answer и не считая ошибку
             return
 
-
-
-        # ОБЯЗАТЕЛЬНО ПОТОМ УДАЛИТЬ
+        # ОБЯЗАТЕЛЬНО ПОТОМ УДАЛИТЬ УБРАТЬ
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_n:
                 self.next_step()
@@ -671,6 +673,10 @@ class GameScene(Scene):
                             (hero_rect_x + (hero_rect_w - target_w) // 2,
                              hero_rect_y + (hero_rect_h - target_h) // 2))
 
+            # ВЫЖЕЛЕНИЕ ЗОН УДАЛИТЬ УБРАТЬ
+            for zone in self.click_zones:
+                pygame.draw.rect(screen, (0, 0, 0), zone.rect, 2)
+
         # 2. ИНСТРУКЦИЯ ДЛЯ ШАГА 0.1 (ВОЗВРАЩЕНА)
         if self.current_step == "0.1":
             overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
@@ -776,7 +782,7 @@ class GameScene(Scene):
             for i in self.selected_options:
                 self.option_buttons[i].status = "correct"
             if self.current_step == "18":
-                self.final_button = Button((SCREEN_WIDTH - 250) // 2, 620, 250, 50,"ПОДВЕСТИ ИТОГИ", None)
+                self.final_button = Button((SCREEN_WIDTH - 250) // 2, 620, 250, 50, "ПОДВЕСТИ ИТОГИ", None)
                 self.multi_select_mode = False
                 self.total_items_to_collect = 0
             else:
