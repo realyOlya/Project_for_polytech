@@ -1,6 +1,7 @@
 import json
 from typing import Any, Dict, Union, List, Set
 
+
 class ActionValidator:
     def __init__(self, scenarios_path: str = "data/scenarios.json"):
         with open(scenarios_path, 'r', encoding='utf-8') as f:
