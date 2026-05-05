@@ -41,12 +41,6 @@ class GameScene(Scene):
         self.selected_options = set()  # индексы выбранных опций
         self.waiting_for_next = False
 
-        # Порядок сцен (включая вступление)
-        # self.steps_order = [
-        #     '0', '0.1', '1', '2', '3', '4', '5', '6_1', '6_2', '6_3',
-        #     '7', '8', '9', '10', '11', '12_1', '12_2', '12_3', '12_4',
-        #     '13', '14', '15', '16', '17', '18'
-        # ]
         self.steps_order = [
             '0', '0.1', '1', '2', '3', '4', '5_1', '5', '6', '6.1', '6.2', '6.3',
             '7', '8', '8.1', '9', '9.1', '10', '10.1', '11', '12.1', '12.2', '12.3', '12.4',
@@ -373,6 +367,12 @@ class GameScene(Scene):
         self.next_button = Button((SCREEN_WIDTH - btn_width) // 2, 620, btn_width, 50, btn_text, None)
         self.retry_button = Button((SCREEN_WIDTH - 250) // 2, 620, 250, 50, "ПОПРОБОВАТЬ СНОВА", None)
 
+    # УДАЛИТЬ УБРАТЬ
+    def previous_step(self):
+        if self.step_index > 0:
+            self.step_index -= 1
+            self.load_step(self.steps_order[self.step_index])
+
     def handle_event(self, event):
 
         # Если мы на 5-й сцене
@@ -387,6 +387,9 @@ class GameScene(Scene):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_n:
                 self.next_step()
+                return
+            if event.key == pygame.K_b:
+                self.previous_step()
                 return
         #
 
@@ -413,24 +416,11 @@ class GameScene(Scene):
                 self.load_step(self.current_step)
             return
 
-        if self.multi_select_mode:
-            if self.next_button and self.next_button.handle_event(event):
-                self.check_multi_select()
-                return
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                for i, btn in enumerate(self.option_buttons):
-                    if btn.rect.collidepoint(event.pos):
-                        if i in self.selected_options:
-                            self.selected_options.remove(i)
-                            btn.status = "normal"  # "не выбрано"
-                        else:
-                            self.selected_options.add(i)
-                            btn.status = "correct"  # подсвечиваем как выбранное
-                        return
-
         # Множественный выбор предметов (зоны клика)
-
         if self.multi_select_mode:
+            if event.type == pygame.MOUSEMOTION:
+                for btn in self.option_buttons:
+                    btn.handle_event(event)
             if self.next_button and self.next_button.handle_event(event):
                 self.check_multi_select()
                 return
@@ -439,10 +429,10 @@ class GameScene(Scene):
                     if btn.rect.collidepoint(event.pos):
                         if i in self.selected_options:
                             self.selected_options.remove(i)
-                            btn.status = "normal"
+                            btn.status = None
                         else:
                             self.selected_options.add(i)
-                            btn.status = "correct"
+                            btn.status = "selected"
                         return
 
         if self.total_items_to_collect > 0:
@@ -759,21 +749,20 @@ class GameScene(Scene):
     def check_multi_select(self):
         selected_texts = [self.option_buttons[i].text for i in self.selected_options]
         if self.validator.validate(self.current_step, selected_texts):
+            for i in self.selected_options:
+                self.option_buttons[i].status = "correct"
             if self.current_step == "18":
+                self.final_button = Button((SCREEN_WIDTH - 250) // 2, 620, 250, 50,"ПОДВЕСТИ ИТОГИ", None)
                 self.multi_select_mode = False
                 self.total_items_to_collect = 0
-                self.option_buttons = []
-                self.final_button = Button(
-                    (SCREEN_WIDTH - 250) // 2, 620, 250, 50,
-                    "ПОДВЕСТИ ИТОГИ", None
-                )
             else:
                 self.waiting_for_next = True
                 self.multi_select_mode = False
                 self.total_items_to_collect = 0
-                self.option_buttons = []
                 self._create_control_buttons()
         else:
+            for i in self.selected_options:
+                self.option_buttons[i].status = "wrong"
             self.is_error = True
             self.error_counter.add_error()
 
@@ -789,7 +778,6 @@ class GameScene(Scene):
         self._build_overlay_ui()
 
     def _build_overlay_ui(self):
-        """Строит кнопки и тексты оверлея по данным из image.json."""
         cfg = self.image_data.get("15_1", {})
         self.overlay_buttons = []
         self.overlay_texts = []
@@ -798,66 +786,49 @@ class GameScene(Scene):
         x, y, w, h = cfg.get("reset_button_pos", [390, 30, 500, 50])
         self.overlay_reset_btn = Button(x, y, w, h, "Нажмите, чтобы начать заново", None)
 
-        # Текст подсказки (некнопка)
+        # Текст подсказки
         txt_rect = cfg.get("text_rect", [400, 110, 480, 60])
-        self.overlay_texts.append({
-            "rect": txt_rect,
-            "text": self.text.get("scene_15_1", "")
-        })
+        self.overlay_texts.append({"rect": txt_rect, "text": self.text.get("scene_15_1", "")})
 
-        # Название продукта (неактивная кнопка)
+        # Название продукта
         prod_rect = cfg.get("product_label_pos", [390, 190, 500, 50])
-        self.overlay_texts.append({
-            "rect": prod_rect,
-            "text": self.overlay_ingredient,
-            "is_button": True
-        })
+        self.overlay_texts.append({"rect": prod_rect, "text": self.overlay_ingredient, "is_button": True})
 
         # Первый ряд кнопок
-        row1 = cfg.get("buttons_row1", [
-            [130, 270, 400, 50],
-            [650, 270, 400, 50]
-        ])
+        row1 = cfg.get("buttons_row1", [[130, 270, 400, 50], [650, 270, 400, 50]])
         btn1 = Button(row1[0][0], row1[0][1], row1[0][2], row1[0][3], "Положить в кастрюлю", None)
         btn2 = Button(row1[1][0], row1[1][1], row1[1][2], row1[1][3], "Припустить в сковороде", None)
+
+        if self.overlay_step == 2:
+            btn1.status = "disabled"
+            btn2.status = "selected"
+
         self.overlay_buttons = [btn1, btn2]
 
-        # Второй ряд – пока только если шаг 2
+        # Второй ряд кнопок
         if self.overlay_step == 2:
-            self._add_second_row_buttons(cfg)
+            lbl_rect = cfg.get("next_label_pos", [390, 350, 500, 40])
+            self.overlay_texts.append({"rect": lbl_rect, "text": "Что делать далее?", "is_label": True})
 
-    def _add_second_row_buttons(self, cfg):
-        """Добавляет подпись и второй ряд кнопок, делает первый ряд неактивным."""
-        # Надпись "Что делать далее?"
-        lbl_rect = cfg.get("next_label_pos", [390, 350, 500, 40])
-        self.overlay_texts.append({
-            "rect": lbl_rect,
-            "text": "Что делать далее?",
-            "is_label": True
-        })
-        # Второй ряд
-        row2 = cfg.get("buttons_row2", [
-            [130, 410, 400, 50],
-            [650, 410, 400, 50]
-        ])
-        btn3 = Button(row2[0][0], row2[0][1], row2[0][2], row2[0][3], "Положить в кастрюлю", None)
-        btn4 = Button(row2[1][0], row2[1][1], row2[1][2], row2[1][3], "Оставить в сковороде", None)
-        self.overlay_buttons.extend([btn3, btn4])
-
-        # Деактивируем первый ряд (меняем статус на 'disabled')
-        for btn in self.overlay_buttons[:2]:
-            btn.status = "disabled"  # нужен новый статус в Button
+            row2 = cfg.get("buttons_row2", [[130, 410, 400, 50], [650, 410, 400, 50]])
+            btn3 = Button(row2[0][0], row2[0][1], row2[0][2], row2[0][3], "Положить в кастрюлю", None)
+            btn4 = Button(row2[1][0], row2[1][1], row2[1][2], row2[1][3], "Оставить в сковороде", None)
+            self.overlay_buttons.extend([btn3, btn4])
 
     def _handle_overlay_event(self, event):
+        if event.type == pygame.MOUSEMOTION:
+            for btn in self.overlay_buttons:
+                if btn.status is None:
+                    btn.handle_event(event)
+            return
+
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             pos = event.pos
 
-            # Кнопка сброса
             if self.overlay_reset_btn and self.overlay_reset_btn.rect.collidepoint(pos):
                 self._reset_scene_15()
                 return
 
-            # Основные кнопки (обрабатываем только активные, у которых callback не None)
             for btn in self.overlay_buttons:
                 if btn.status == "disabled":
                     continue
@@ -867,14 +838,12 @@ class GameScene(Scene):
 
     def _on_overlay_button_click(self, action):
         if action == "Положить в кастрюлю":
-            # Если это первое действие – сразу завершаем
             if self.overlay_step == 1:
                 self._finish_cooking([action])
-            else:  # шаг 2
+            else:
                 self._finish_cooking(["Припустить в сковороде", action])
 
         elif action == "Припустить в сковороде":
-            # Переходим ко второму шагу
             self.overlay_step = 2
             self._build_overlay_ui()
 
@@ -937,8 +906,4 @@ class GameScene(Scene):
 
         # Кнопки действий (с учётом состояния)
         for btn in self.overlay_buttons:
-            if btn.status == "disabled":
-                # Рисуем затемнённой (цвет как при наведении, если нужен другой – замените)
-                btn.draw_disabled(screen)  # нужно добавить метод в Button
-            else:
-                btn.draw(screen)
+            btn.draw(screen)
