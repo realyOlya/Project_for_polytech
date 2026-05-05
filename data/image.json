@@ -61,7 +61,7 @@
   "5": {
     "background": "images/scene_5/умывалка.png",
     "text_rect": [100, 100, 1080, 100],
-    "input_pos": [130, 540, 400, 50],
+    "input_pos": [650, 540, 200, 50],
     "buttons_pos": [
         [130, 210],
         [130, 290],
