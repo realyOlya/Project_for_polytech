@@ -1,6 +1,6 @@
-import pygame
 import time
 from config import *
+
 
 class Feedback:
     def __init__(self, screen_width, screen_height, font):
@@ -25,7 +25,8 @@ class Feedback:
         self.color = FEEDBACK_COLOR_SUCCESS if is_success else FEEDBACK_COLOR_ERROR
 
     def draw(self, surface):
-        if not self.is_active: return
+        if not self.is_active:
+            return
         elapsed = time.time() - self.start_time
         if elapsed > self.DURATION:
             self.is_active = False

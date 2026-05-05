@@ -1,4 +1,3 @@
-import pygame
 import time
 from config import *  # Импортируем все константы
 
@@ -27,15 +26,14 @@ class Button:
         current_size = self.base_size
         test_font = pygame.font.Font(self.font_path, current_size)
 
-        while test_font.size(self.text)[0] > self.rect.width - BUTTON_TEXT_PADDING and current_size > BUTTON_MIN_FONT_SIZE:
+        while (test_font.size(self.text)[0] > self.rect.width - BUTTON_TEXT_PADDING
+               and current_size > BUTTON_MIN_FONT_SIZE):
             current_size -= 1
             test_font = pygame.font.Font(self.font_path, current_size)
 
         return test_font
 
     def draw(self, surface):
-        current_time = time.time()
-
         color = self.color_normal
         if self.status == 'correct':
             color = self.color_correct
@@ -52,11 +50,13 @@ class Button:
         surface.blit(text_surf, text_rect)
 
     def handle_event(self, event):
-        if self.status is not None: return False
+        if self.status is not None:
+            return False
         if event.type == pygame.MOUSEMOTION:
             self.is_hovered = self.rect.collidepoint(event.pos)
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            if self.is_hovered: return True
+            if self.is_hovered:
+                return True
         return False
 
     def set_wrong(self):
@@ -67,4 +67,3 @@ class Button:
         self.status = None
         self.is_hovered = False
         self.wrong_timer = 0
-

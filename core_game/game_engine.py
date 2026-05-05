@@ -1,6 +1,7 @@
 import pygame
 from config import SCREEN_WIDTH, SCREEN_HEIGHT, FPS
 
+
 class GameEngine:
     def __init__(self, scene_manager):
         pygame.init()

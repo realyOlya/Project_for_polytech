@@ -1,4 +1,3 @@
-import pygame
 import time
 from config import *
 
@@ -82,11 +81,13 @@ class DialogBox:
             surface.blit(text_surf, text_rect)
 
     def handle_event(self, event):
-        if self.status is not None: return False
+        if self.status is not None:
+            return False
         if event.type == pygame.MOUSEMOTION:
             self.is_hovered = self.rect.collidepoint(event.pos)
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            if self.is_hovered: return True
+            if self.is_hovered:
+                return True
         return False
 
     def set_wrong(self):

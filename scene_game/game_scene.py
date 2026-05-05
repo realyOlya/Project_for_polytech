@@ -391,6 +391,16 @@ class GameScene(Scene):
             self.load_step(self.steps_order[self.step_index])
 
     def handle_event(self, event):
+        # УДАЛИТЬ УБРАТЬ
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_n:
+                self.next_step()
+                return
+            if event.key == pygame.K_b:
+                self.previous_step()
+                return
+        #
+
         # 1. Если окно помощи открыто, закрываем его при любом клике
         if self.show_help_window:
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -423,16 +433,6 @@ class GameScene(Scene):
                     if btn.rect.collidepoint(event.pos):
                         return  # Просто выходим, не вызывая check_answer и не считая ошибку
             return
-
-        # ОБЯЗАТЕЛЬНО ПОТОМ УДАЛИТЬ УБРАТЬ
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_n:
-                self.next_step()
-                return
-            if event.key == pygame.K_b:
-                self.previous_step()
-                return
-        #
 
         if self.overlay_active:
             self._handle_overlay_event(event)
@@ -620,7 +620,8 @@ class GameScene(Scene):
     def update(self, dt):
         pass
 
-    def draw_description_block(self, screen, text, rect_coords, font):
+    @staticmethod
+    def draw_description_block(screen, text, rect_coords, font):
         """
         rect_coords: (x, y, ширина, высота)
         """
@@ -673,9 +674,13 @@ class GameScene(Scene):
                             (hero_rect_x + (hero_rect_w - target_w) // 2,
                              hero_rect_y + (hero_rect_h - target_h) // 2))
 
-            # ВЫЖЕЛЕНИЕ ЗОН УДАЛИТЬ УБРАТЬ
+            # ВЫДЕЛЕНИЕ ЗОН УДАЛИТЬ УБРАТЬ
             for zone in self.click_zones:
                 pygame.draw.rect(screen, (0, 0, 0), zone.rect, 2)
+                if zone.is_correct and self.checkmark_img:
+                    x = zone.rect.x + (zone.rect.width - self.checkmark_img.get_width()) // 2
+                    y = zone.rect.y + (zone.rect.height - self.checkmark_img.get_height()) // 2
+                    screen.blit(self.checkmark_img, (x, y))
 
         # 2. ИНСТРУКЦИЯ ДЛЯ ШАГА 0.1 (ВОЗВРАЩЕНА)
         if self.current_step == "0.1":
@@ -796,7 +801,8 @@ class GameScene(Scene):
             self.is_error = True
             self.error_counter.add_error()
 
-    def show_end_screen(self):
+    @staticmethod
+    def show_end_screen():
         pygame.quit()
         exit()
 
