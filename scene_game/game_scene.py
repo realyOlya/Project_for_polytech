@@ -332,7 +332,7 @@ class GameScene(Scene):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.sequence_next_button and self.sequence_next_button.rect.collidepoint(event.pos):
                     self.check_sequence_answer()
-        # ОБЯЗАТЕЛЬНО ПОТОМ УДАЛИТЬ
+        # ОБЯЗАТЕЛЬНО ПОТОМ УДАЛИТЬ УБРАТЬ
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_n:
                 self.next_step()
@@ -583,6 +583,7 @@ class GameScene(Scene):
                             (hero_rect_x + (hero_rect_w - target_w) // 2,
                              hero_rect_y + (hero_rect_h - target_h) // 2))
 
+            # ВЫДЕЛЕНИЕ ЗОН УБРАТЬ УДАЛИТЬ
             for zone in self.click_zones:
                 pygame.draw.rect(screen, (0, 0, 0), zone.rect, 2)
 
