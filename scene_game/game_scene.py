@@ -500,7 +500,7 @@ class GameScene(Scene):
         )
 
         # Создаем кнопку "Далее" рядом (координаты можно взять из JSON или рассчитать)
-        btn_pos = self.image_data["5"].get("next_button_pos", [765, 550])
+        btn_pos = self.image_data["5"].get("next_button_pos", [765, 550]) # ЗАЧЕМ ЭТО????
         self.sequence_next_button = Button(130, 610, 250, 50, "Далее", None)
 
     def check_sequence_answer(self):
