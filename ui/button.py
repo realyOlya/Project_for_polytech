@@ -2,6 +2,7 @@ import pygame
 import time
 from config import *  # Импортируем все константы
 
+
 class Button:
     def __init__(self, x, y, width, height, text, font_path):
         self.rect = pygame.Rect(x, y, width, height)
@@ -35,13 +36,12 @@ class Button:
     def draw(self, surface):
         current_time = time.time()
 
-
         color = self.color_normal
         if self.status == 'correct':
             color = self.color_correct
         elif self.status == 'wrong':
             color = self.color_wrong
-        elif self.is_hovered:
+        elif self.is_hovered or self.status == 'selected':
             color = self.color_hover
 
         pygame.draw.rect(surface, color, self.rect, border_radius=BUTTON_BORDER_RADIUS)
@@ -67,3 +67,4 @@ class Button:
         self.status = None
         self.is_hovered = False
         self.wrong_timer = 0
+

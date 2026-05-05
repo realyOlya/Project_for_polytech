@@ -268,8 +268,24 @@
     ]
   },
   "15": {
-    "background": "images/scene_15/горячий.png",
-    "text_rect": [400, 50, 550, 200]
+  "background": "images/scene_15/горячий.png",
+  "text_rect": [400, 50, 550, 200],
+  "buttons_pos": []
+  },
+  "15_1": {
+  "background": "images/scene_15/горячий.png",
+  "reset_button_pos": [390, 30, 500, 50],
+  "text_rect": [400, 110, 480, 60],
+  "product_label_pos": [390, 190, 500, 50],
+  "buttons_row1": [
+    [130, 270, 400, 50],
+    [650, 270, 400, 50]
+  ],
+  "next_label_pos": [390, 350, 500, 40],
+  "buttons_row2": [
+    [130, 410, 400, 50],
+    [650, 410, 400, 50]
+  ]
   },
   "16": {
     "background": "images/scene_16/горячий.png",

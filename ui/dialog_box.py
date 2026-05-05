@@ -60,11 +60,6 @@ class DialogBox:
         return wrapped_lines
 
     def draw(self, surface):
-        current_time = time.time()
-        if self.status == 'wrong' and (current_time - self.wrong_timer) > self.WRONG_DURATION:
-            self.status = None
-            self.wrong_timer = 0
-
         color = self.color_normal
         if self.status == 'correct':
             color = self.color_correct
