@@ -277,7 +277,7 @@ class GameScene(Scene):
             "1": self.items.get("clothes", []),
             "2": self.items.get("shoes", []),
             "3": self.items.get("hats", []),
-            "4": self.items.get("jewerly", []),  # сюда не попадём из-за проверки выше
+            "4": self.items.get("jewerly", []),
             "5_1":  ["Нажмите, чтобы продолжить"],
             "5": self.items.get("handwashing", []),
             "6": ["Нажмите, чтобы продолжить"],
