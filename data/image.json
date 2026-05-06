@@ -269,8 +269,14 @@
   },
   "15": {
   "background": "images/scene_15/горячий.png",
-  "text_rect": [400, 50, 550, 200],
-  "buttons_pos": []
+  "text_rect": [100, 200, 1080, 100],
+    "buttons_pos": [
+        [130, 310],
+        [130, 380],
+        [650, 310],
+        [650, 380],
+        [390, 450]
+    ]
   },
   "15_1": {
   "background": "images/scene_15/горячий.png",

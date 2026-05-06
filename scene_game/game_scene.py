@@ -176,7 +176,7 @@ class GameScene(Scene):
                     self.bg_image = pygame.image.load(str(bg_path))
                     self.bg_image = pygame.transform.scale(self.bg_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
-            self.current_question = self.text.get("scene_15", "")
+            #self.current_question = self.text.get("scene_15", "")
             if self.current_question:
                 text_surf = self.font_medium.render(self.current_question, True, (0, 0, 0))
                 qx = (SCREEN_WIDTH - text_surf.get_width() - 40) // 2
