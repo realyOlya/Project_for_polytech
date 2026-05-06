@@ -218,7 +218,7 @@ class GameScene(Scene):
                     self.extra_image_pos = ext_data["pos"]
 
             # Зоны клика (координаты относительно области персонажа)
-            hx, hy, hw, hh = self.hero_rect      # (50, 40, 320, 660)
+            hx, hy, hw, hh = self.hero_rect
             for item in visuals.get("items_to_click", []):
                 r = item["rect"]
                 zone = Button(hx + r[0], hy + r[1], r[2], r[3], "", None)
@@ -277,7 +277,7 @@ class GameScene(Scene):
             "1": self.items.get("clothes", []),
             "2": self.items.get("shoes", []),
             "3": self.items.get("hats", []),
-            "4": self.items.get("jewerly", []),  # сюда не попадём из-за проверки выше
+            "4": self.items.get("jewerly", []),
             "5_1":  ["Нажмите, чтобы продолжить"],
             "5": self.items.get("handwashing", []),
             "6": ["Нажмите, чтобы продолжить"],
