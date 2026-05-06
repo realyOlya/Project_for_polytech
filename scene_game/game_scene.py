@@ -75,21 +75,17 @@ class GameScene(Scene):
 
         # Получаем данные для сцены 0.1
         scene_cfg = self.image_data.get("0.1", {})
-        # Берем координаты из JSON. Если их там нет, используем 450 как страховку
         coords = scene_cfg.get("input_pos", [390, 450, 500, 50])
-
-        # Валидатор char.isalpha() разрешает только буквы (русские и английские)
-        # Дополнительно разрешаем пробел, если он нужен в имени
         self.name_input = InputBox(
             coords[0], coords[1], coords[2], coords[3],
             self.font_medium,
             validator=lambda char: char.isalpha() or char == " " or char == "-"
         )
-        # В методе __init__ класса GameScene
-        self.sequence_input = None  # Инициализируем пустой переменной
+        self.sequence_input = None
         self.sequence_label = "Введите правильную последовательность:"
 
-        self.sequence_next_button = None  # Добавьте эту строку
+        self.sequence_next_button = None
+        self.sequence_locked = False
         self.sequence_input = None
 
         self.current_question = ""
@@ -415,23 +411,29 @@ class GameScene(Scene):
 
         # 3. СПЕЦИФИКА ШАГА 5 (МЫТЬЕ РУК)
         if self.current_step == "5":
-            if self.sequence_input:
+            if self.sequence_input and not self.sequence_locked:
                 self.sequence_input.handle_event(event)
 
+            if event.type == pygame.MOUSEMOTION:
+                if self.sequence_next_button:
+                    self.sequence_next_button.handle_event(event)
+                return
+
             if event.type == pygame.MOUSEBUTTONDOWN:
-                # Взаимодействуем ТОЛЬКО с нижней кнопкой "Проверить/Далее"
                 if self.sequence_next_button and self.sequence_next_button.rect.collidepoint(event.pos):
                     if self.sequence_next_button.text == "Далее":
                         self.sequence_input = None
                         self.sequence_next_button = None
                         self.next_step()
+                    elif self.sequence_next_button.text == "ПОПРОБОВАТЬ СНОВА":
+                        self.reset_step_5()
                     else:
                         self.check_sequence_answer()
 
                 # БЛОКИРОВКА: Если кликнули по любой из 7 кнопок с текстом, ничего не делаем
                 for btn in self.option_buttons:
                     if btn.rect.collidepoint(event.pos):
-                        return  # Просто выходим, не вызывая check_answer и не считая ошибку
+                        return
             return
 
         if self.overlay_active:
@@ -581,6 +583,17 @@ class GameScene(Scene):
         if self.current_step == "5":
             self.setup_step_5()
 
+    def reset_step_5(self):
+        self.sequence_input.text = ""
+        self.sequence_input.txt_surface = self.sequence_input.font.render(
+            "", True, self.sequence_input.color
+        )
+        self.sequence_input.is_error = False
+        self.sequence_input.is_correct = False
+        self.sequence_locked = False
+        self.sequence_input.active = True
+        self.sequence_next_button.text = "Проверить"
+
     def setup_step_5(self):
         # Координаты основного поля ввода из JSON
         pos = self.image_data["5"].get("input_pos", [390, 450, 400, 50])
@@ -603,6 +616,8 @@ class GameScene(Scene):
         # 4. Кнопка "Проверить"
         self.sequence_next_button = Button(900, 540, 250, 50, "Проверить", None)
 
+        self.sequence_locked = False
+
     def check_sequence_answer(self):
         step_data = self.validator.actions.get("5", {})
         correct_answer = str(step_data.get("correct", ""))
@@ -611,9 +626,13 @@ class GameScene(Scene):
 
         if user_answer == correct_answer:
             self.sequence_input.is_error = False
+            self.sequence_input.is_correct = True
             self.sequence_next_button.text = "Далее"
+            self.sequence_locked = True
         else:
             self.sequence_input.is_error = True
+            self.sequence_locked = True
+            self.sequence_next_button.text = "ПОПРОБОВАТЬ СНОВА"
             if hasattr(self, 'error_counter'):
                 self.error_counter.add_error()
 
@@ -729,6 +748,10 @@ class GameScene(Scene):
             text_y = self.label_rect.y + (self.label_rect.height - label_surf.get_height()) // 2
             screen.blit(label_surf, (text_x, text_y))
             self.sequence_input.draw(screen)
+
+            if hasattr(self.sequence_input, 'is_correct') and self.sequence_input.is_correct:
+                pygame.draw.rect(screen, (0, 200, 0), self.sequence_input.rect, 3, border_radius=5)
+
             self.sequence_next_button.draw(screen)
 
         # 5. КНОПКИ ОТВЕТОВ И ОШИБКИ[cite: 25]

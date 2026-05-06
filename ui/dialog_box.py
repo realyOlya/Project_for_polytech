@@ -33,6 +33,7 @@ class DialogBox:
         self.color_hover = BUTTON_COLOR_HOVER
         self.color_correct = BUTTON_COLOR_CORRECT
         self.color_wrong = BUTTON_COLOR_WRONG
+        self.color_selected = BUTTON_COLOR_SELECTED
 
         self.status = None
         self.is_hovered = False
@@ -65,6 +66,8 @@ class DialogBox:
             color = self.color_correct
         elif self.status == 'wrong':
             color = self.color_wrong
+        elif self.status == 'selected':
+            color = self.color_selected
         elif self.is_hovered:
             color = self.color_hover
 

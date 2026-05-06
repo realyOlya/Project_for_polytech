@@ -17,6 +17,7 @@ class Button:
         self.color_hover = BUTTON_COLOR_HOVER
         self.color_correct = BUTTON_COLOR_CORRECT
         self.color_wrong = BUTTON_COLOR_WRONG
+        self.color_selected = BUTTON_COLOR_SELECTED
 
         self.status = None
         self.is_hovered = False
@@ -40,7 +41,9 @@ class Button:
             color = self.color_correct
         elif self.status == 'wrong':
             color = self.color_wrong
-        elif self.is_hovered or self.status == 'selected':
+        elif self.status == 'selected':
+            color = self.color_selected
+        elif self.is_hovered:
             color = self.color_hover
 
         pygame.draw.rect(surface, color, self.rect, border_radius=BUTTON_BORDER_RADIUS)

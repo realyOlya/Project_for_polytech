@@ -10,6 +10,7 @@ class InputBox:
         self.txt_surface = self.font.render(text, True, self.color)
         self.active = False
         self.is_error = False
+        self.is_correct = False
         # validator — это функция, которая возвращает True или False
         self.validator = validator
 
