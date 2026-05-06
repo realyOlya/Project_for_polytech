@@ -218,7 +218,7 @@ class GameScene(Scene):
                     self.extra_image_pos = ext_data["pos"]
 
             # Зоны клика (координаты относительно области персонажа)
-            hx, hy, hw, hh = self.hero_rect      # (50, 40, 320, 660)
+            hx, hy, hw, hh = self.hero_rect
             for item in visuals.get("items_to_click", []):
                 r = item["rect"]
                 zone = Button(hx + r[0], hy + r[1], r[2], r[3], "", None)
