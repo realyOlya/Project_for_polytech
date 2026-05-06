@@ -46,7 +46,7 @@ class GameScene(Scene):
         self.checkmark_img = None
 
         self.multi_select_mode = False
-        self.selected_options = set()  # индексы выбранных опций
+        self.selected_options = set()
         self.waiting_for_next = False
 
         self.steps_order = [
