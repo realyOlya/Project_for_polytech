@@ -9,7 +9,7 @@ class Button:
         self.text = text
         self.font_path = font_path
         self.base_size = BUTTON_BASE_FONT_SIZE
-        self.font = self._fit_text()
+        self.font = self.fit_text()
         self.color_normal = BUTTON_COLOR_NORMAL
         self.color_hover = BUTTON_COLOR_HOVER
         self.color_correct = BUTTON_COLOR_CORRECT
@@ -20,7 +20,7 @@ class Button:
         self.wrong_timer = 0
         self.WRONG_DURATION = BUTTON_WRONG_DURATION
 
-    def _fit_text(self):
+    def fit_text(self):
         current_size = self.base_size
         test_font = pygame.font.Font(self.font_path, current_size)
         while (test_font.size(self.text)[0] > self.rect.width - BUTTON_TEXT_PADDING

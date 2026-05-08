@@ -32,6 +32,8 @@ class GameScene(Scene):
         self.help_button = Button(20, 20, 40, 40, "?", None)
         self.validator = ActionValidator("data/scenarios.json")
         self.error_counter = ErrorCounter()
+        self.error_button = Button(SCREEN_WIDTH - 250, 10, 240, 36,
+                                   f"Ошибок: {self.error_counter.count}", font_path=None)
         self.confirmation = ConfirmationHandler()
         self.correct_count = 0
         self.total_items_to_collect = 0
@@ -39,13 +41,11 @@ class GameScene(Scene):
         self.multi_select_mode = False
         self.selected_options = set()
         self.waiting_for_next = False
-
         self.steps_order = [
             '0', '0.1', '1', '2', '3', '4', '5_1', '5', '6', '6.1', '6.2', '6.3',
             '7', '8', '8.1', '9', '9.1', '10', '10.1', '11', '12.1', '12.2', '12.3', '12.4',
             '13', '13.1', '14', '15', '16', '17', '18'
         ]
-
         self.step_index = 0
         self.current_step = self.steps_order[0]
         self.hero_rect = (50, 40, 320, 660)
@@ -62,13 +62,8 @@ class GameScene(Scene):
         self.font_small = pygame.font.SysFont("arial", 24)
         scene_cfg = self.image_data.get("0.1", {})
         coords = scene_cfg.get("input_pos", [390, 450, 500, 50])
-
-        self.name_input = InputBox(
-            coords[0], coords[1], coords[2], coords[3],
-            self.font_medium,
-            validator=lambda char: char.isalpha() or char == " " or char == "-"
-        )
-
+        self.name_input = InputBox(coords[0], coords[1], coords[2], coords[3], self.font_medium,
+                                   validator=lambda char: char.isalpha() or char == " " or char == "-")
         self.sequence_input = None
         self.sequence_label = "Введите правильную последовательность:"
         self.sequence_next_button = None
@@ -262,7 +257,7 @@ class GameScene(Scene):
             "14": self.items.get("dishes", []),
             "15": self.items.get("ingredients", []),
             "16": self.items.get("temperature", []),
-            "17": ["Подать суп на бракераж"],
+            "17": ["Нажмите, чтобы продолжить"],
             "18": self.items.get("cleaning", []),
         }
         return options_map.get(step_id, ["Далее"])
@@ -336,20 +331,20 @@ class GameScene(Scene):
         self.retry_button = Button((SCREEN_WIDTH - 250) // 2, 620, 250, 50, "ПОПРОБОВАТЬ СНОВА", None)
 
     # УДАЛИТЬ УБРАТЬ
-    def previous_step(self):
-        if self.step_index > 0:
-            self.step_index -= 1
-            self.load_step(self.steps_order[self.step_index])
+    # def previous_step(self):
+    #     if self.step_index > 0:
+    #         self.step_index -= 1
+    #         self.load_step(self.steps_order[self.step_index])
 
     def handle_event(self, event):
         # УДАЛИТЬ УБРАТЬ
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_n:
-                self.next_step()
-                return
-            if event.key == pygame.K_b:
-                self.previous_step()
-                return
+        # if event.type == pygame.KEYDOWN:
+        #     if event.key == pygame.K_n:
+        #         self.next_step()
+        #         return
+        #     if event.key == pygame.K_b:
+        #         self.previous_step()
+        #         return
         #
         if self.show_help_window:
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -470,7 +465,7 @@ class GameScene(Scene):
 
     def check_answer(self, idx, text):
         if self.validator.validate(self.current_step, text):
-            if self.current_step in ["0", "0.1", "5_1", "6", "7", "8.1", "9.1", "10.1", "12.4", "13.1"]:
+            if self.current_step in ["0", "0.1", "5_1", "6", "7", "8.1", "9.1", "10.1", "12.4", "13.1", "17"]:
                 if self.current_step == "0.1":
                     player_name = self.name_input.text.strip()
                     if not player_name:
@@ -666,8 +661,11 @@ class GameScene(Scene):
             if hasattr(self.sequence_input, 'is_correct') and self.sequence_input.is_correct:
                 pygame.draw.rect(screen, (0, 200, 0), self.sequence_input.rect, 3, border_radius=5)
             self.sequence_next_button.draw(screen)
-        err_text = self.font_small.render(f"Ошибок: {self.error_counter.count}", True, (231, 76, 60))
-        screen.blit(err_text, (SCREEN_WIDTH - 120, 20))
+
+        if self.current_step not in ["0", "0.1"]:
+            self.error_button.text = f"Ошибок: {self.error_counter.count}"
+            self.error_button.font = self.error_button.fit_text()
+            self.error_button.draw(screen)
 
         if self.option_buttons and not self.overlay_active:
             for btn in self.option_buttons:
