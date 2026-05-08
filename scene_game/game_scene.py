@@ -132,6 +132,7 @@ class GameScene(Scene):
         self.show_help_window = False
         # Кнопка в левом верхнем углу (x=20, y=20)
         self.help_button = Button(20, 20, 40, 40, "?", None)
+        self.scene15_reset_button = None  # кнопка сброса на основной сцене 15
 
     def load_step(self, step_id):
         self.current_step = step_id
@@ -175,6 +176,13 @@ class GameScene(Scene):
                 if bg_path.exists():
                     self.bg_image = pygame.image.load(str(bg_path))
                     self.bg_image = pygame.transform.scale(self.bg_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
+
+            # --- НОВАЯ КНОПКА СБРОСА ---
+            reset_pos = visuals.get("reset_button_pos", [SCREEN_WIDTH - 300, 20, 280, 40])
+            self.scene15_reset_button = Button(
+                reset_pos[0], reset_pos[1], reset_pos[2], reset_pos[3],
+                "Нажмите, чтобы начать заново", None
+            )
 
             #self.current_question = self.text.get("scene_15", "")
             if self.current_question:
@@ -494,6 +502,11 @@ class GameScene(Scene):
             return
 
         if self.current_step == "15" and not self.waiting_for_next and not self.is_error:
+            # Обработка кнопки сброса
+            if self.scene15_reset_button and self.scene15_reset_button.handle_event(event):
+                self._reset_scene_15()
+                return
+
             for i, btn in enumerate(self.option_buttons):
                 if btn.handle_event(event):
                     # Запускаем оверлей для выбранного ингредиента
@@ -739,6 +752,10 @@ class GameScene(Scene):
             if self.question_button:
                 self.question_button.draw(screen)
 
+            # Кнопка сброса для сцены 15
+            if self.current_step == "15" and self.scene15_reset_button and not self.overlay_active:
+                self.scene15_reset_button.draw(screen)
+
         # 4. СПЕЦИФИЧЕСКИЙ ИНТЕРФЕЙС ДЛЯ ШАГА 5[cite: 25]
         if self.current_step == "5" and self.sequence_input:
             pygame.draw.rect(screen, (255, 255, 255), self.label_rect, border_radius=10)
@@ -934,6 +951,9 @@ class GameScene(Scene):
         self._close_overlay()
         if self.current_step == "15":
             self._create_ingredient_buttons(self.cooking_ingredients)
+            # Сбросить флаги ожидания/ошибки, если они были
+            self.waiting_for_next = False
+            self.is_error = False
 
     def _draw_overlay(self, screen):
         # Полупрозрачное затемнение
