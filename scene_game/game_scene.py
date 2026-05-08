@@ -188,7 +188,6 @@ class GameScene(Scene):
                 None
             )
 
-
             #self.current_question = self.text.get("scene_15", "")
             if self.current_question:
                 text_surf = self.font_medium.render(self.current_question, True, (0, 0, 0))
