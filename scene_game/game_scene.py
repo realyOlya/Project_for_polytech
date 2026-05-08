@@ -351,7 +351,6 @@ class GameScene(Scene):
                 self.previous_step()
                 return
         #
-
         if self.show_help_window:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 self.show_help_window = False
@@ -620,9 +619,7 @@ class GameScene(Scene):
                             (hero_rect_x + (hero_rect_w - target_w) // 2,
                              hero_rect_y + (hero_rect_h - target_h) // 2))
 
-            # ВЫДЕЛЕНИЕ ЗОН УДАЛИТЬ УБРАТЬ
             for zone in self.click_zones:
-                pygame.draw.rect(screen, (0, 0, 0), zone.rect, 2)
                 if zone.is_correct and self.checkmark_img:
                     x = zone.rect.x + (zone.rect.width - self.checkmark_img.get_width()) // 2
                     y = zone.rect.y + (zone.rect.height - self.checkmark_img.get_height()) // 2
@@ -648,8 +645,6 @@ class GameScene(Scene):
             self.name_input.draw(screen)
 
         if self.current_step not in ["0", "0.1"]:
-            for zone in self.click_zones:
-                pygame.draw.rect(screen, (0, 0, 0), zone.rect, 2)
             description_text = self._get_description_for_step(self.current_step)
 
             if description_text:
@@ -801,12 +796,14 @@ class GameScene(Scene):
             for btn in self.overlay_buttons:
                 if btn.status is None:
                     btn.handle_event(event)
+            if self.overlay_reset_btn:
+                self.overlay_reset_btn.handle_event(event)
             return
 
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             pos = event.pos
             if self.overlay_reset_btn and self.overlay_reset_btn.rect.collidepoint(pos):
-                self._reset_scene_15()
+                self._reset_overlay_to_initial()
                 return
 
             for btn in self.overlay_buttons:
@@ -851,6 +848,11 @@ class GameScene(Scene):
         self.cooking_validation_passed = False
         self._close_overlay()
         self.load_step("15")
+
+    def _reset_overlay_to_initial(self):
+        self.overlay_step = 1
+        self.cooking_actions[self.overlay_ingredient] = []
+        self._build_overlay_ui()
 
     def _draw_overlay(self, screen):
         overlay_surf = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
