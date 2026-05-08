@@ -28,11 +28,13 @@ class Feedback:
         if not self.is_active:
             return
         elapsed = time.time() - self.start_time
+
         if elapsed > self.DURATION:
             self.is_active = False
             return
         self.y = self.start_y - (elapsed * self.SPEED)
         text_surf = self.font.render(self.message, True, self.color)
+
         if elapsed > self.DURATION * 0.6:
             alpha = int(255 * (1 - (elapsed / self.DURATION)))
             text_surf.set_alpha(max(0, alpha))

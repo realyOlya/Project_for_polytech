@@ -268,8 +268,8 @@
     ]
   },
   "15": {
-  "background": "images/scene_15/горячий.png",
-  "text_rect": [100, 200, 1080, 100],
+    "background": "images/scene_15/горячий.png",
+    "text_rect": [100, 200, 1080, 100],
     "buttons_pos": [
         [130, 310],
         [130, 380],
@@ -282,16 +282,16 @@
     "check_button_width": 350
   },
   "15_1": {
-  "background": "images/scene_15/горячий.png",
-  "reset_button_pos": [390, 30, 500, 50],
-  "text_rect": [400, 110, 480, 60],
-  "product_label_pos": [390, 190, 500, 50],
-  "buttons_row1": [
+    "background": "images/scene_15/горячий.png",
+    "reset_button_pos": [390, 30, 500, 50],
+    "text_rect": [400, 110, 480, 60],
+    "product_label_pos": [390, 190, 500, 50],
+    "buttons_row1": [
     [130, 270, 400, 50],
     [650, 270, 400, 50]
   ],
-  "next_label_pos": [390, 350, 500, 40],
-  "buttons_row2": [
+    "next_label_pos": [390, 350, 500, 40],
+    "buttons_row2": [
     [130, 410, 400, 50],
     [650, 410, 400, 50]
   ]
@@ -341,7 +341,6 @@
         [650, 550]
     ]
   },
-
   "19": {
     "background": "images/scene_19/вступление без текста.png",
     "text_rect": [400, 50, 550, 200]

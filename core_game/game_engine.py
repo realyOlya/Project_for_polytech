@@ -15,7 +15,6 @@ class GameEngine:
     def run(self):
         while self.running:
             current_scene = self.scene_manager.get_current_scene()
-
             if current_scene:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
@@ -24,13 +23,10 @@ class GameEngine:
                         if event.key == pygame.K_ESCAPE:
                             self.running = False
                     current_scene.handle_event(event)
-
                 current_scene.update(self.dt)
                 current_scene.draw(self.screen)
             else:
                 self.running = False
-
             pygame.display.flip()
             self.dt = self.clock.tick(FPS) / 1000.0
-
         pygame.quit()
