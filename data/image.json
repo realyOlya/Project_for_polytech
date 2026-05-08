@@ -278,7 +278,8 @@
         [390, 450]
     ],
     "reset_button_pos": [380, 150, 600, 40],
-    "check_button_pos": [390, 620]
+    "check_button_pos": [390, 620],
+    "check_button_width": 350
   },
   "15_1": {
   "background": "images/scene_15/горячий.png",

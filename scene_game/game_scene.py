@@ -178,18 +178,12 @@ class GameScene(Scene):
                     self.bg_image = pygame.image.load(str(bg_path))
                     self.bg_image = pygame.transform.scale(self.bg_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
-            # --- КНОПКА СБРОСА ---
-            reset_pos = visuals.get("reset_button_pos", [SCREEN_WIDTH - 300, 20, 280, 40])
-            self.scene15_reset_button = Button(
-                reset_pos[0], reset_pos[1], reset_pos[2], reset_pos[3],
-                "Нажмите, чтобы начать заново", None
-            )
 
             # --- НОВАЯ КНОПКА ПРОВЕРКИ / ДАЛЕЕ ---
             # Позиция по умолчанию: снизу по центру, но можно задать в image.json
-            check_btn_pos = visuals.get("check_button_pos", [(SCREEN_WIDTH - 250) // 2, 620])
+            check_btn_pos = visuals.get("check_button_pos", [(SCREEN_WIDTH - 500) // 2, 620])
             self.next_button = Button(
-                check_btn_pos[0], check_btn_pos[1], 250, 50,
+                check_btn_pos[0], check_btn_pos[1], 500, 50,
                 "ПРОВЕРИТЬ" if not self.cooking_validation_passed else "ДАЛЕЕ",
                 None
             )
@@ -513,15 +507,13 @@ class GameScene(Scene):
             return
 
         if self.current_step == "15" and not self.waiting_for_next and not self.is_error:
-            # Обработка кнопки сброса
-            if self.scene15_reset_button and self.scene15_reset_button.handle_event(event):
-                self._reset_scene_15()
-                return
 
-            # Обработка кнопки "ПРОВЕРИТЬ" / "ДАЛЕЕ"
+            # Обработка кнопки ("ПРОВЕРИТЬ", "ДАЛЕЕ", "Неверно. Попробуйте еще раз")
             if self.next_button and self.next_button.handle_event(event):
                 if self.next_button.text == "ДАЛЕЕ":
-                    self.next_step()  # переход к следующей сцене
+                    self.next_step()
+                elif self.next_button.text == "Неверно. Попробуйте еще раз":
+                    self._reset_scene_15()  # сброс + кнопка снова "ПРОВЕРИТЬ"
                 else:  # "ПРОВЕРИТЬ"
                     self.check_cooking_sequence()
                 return
@@ -771,9 +763,7 @@ class GameScene(Scene):
             if self.question_button:
                 self.question_button.draw(screen)
 
-            # Кнопка сброса для сцены 15
-            if self.current_step == "15" and self.scene15_reset_button and not self.overlay_active:
-                self.scene15_reset_button.draw(screen)
+
 
         # 4. СПЕЦИФИЧЕСКИЙ ИНТЕРФЕЙС ДЛЯ ШАГА 5[cite: 25]
         if self.current_step == "5" and self.sequence_input:
@@ -967,18 +957,13 @@ class GameScene(Scene):
         self.overlay_reset_btn = None
 
     def _reset_scene_15(self):
-        """Полный сброс обработки ингредиентов – очищает флаги и действия."""
+        """Полный сброс обработки ингредиентов – очищает флаги и перезагружает сцену."""
         self.cooking_flags = {ing: False for ing in self.cooking_ingredients}
         self.cooking_actions = {ing: [] for ing in self.cooking_ingredients}
-        self.cooking_validation_passed = False  # <-- сброс
+        self.cooking_validation_passed = False
         self._close_overlay()
-        if self.current_step == "15":
-            self._create_ingredient_buttons(self.cooking_ingredients)
-            self.waiting_for_next = False
-            self.is_error = False
-            # Восстанавливаем кнопку "ПРОВЕРИТЬ"
-            self.next_button.text = "ПРОВЕРИТЬ"
-            self.next_button.status = None
+        # Перезагружаем сцену, чтобы всё обновилось (кнопки, флаги, внешний вид)
+        self.load_step("15")
 
     def _draw_overlay(self, screen):
         # Полупрозрачное затемнение
@@ -1016,11 +1001,10 @@ class GameScene(Scene):
         """Проверяет, правильно ли приготовлены все ингредиенты."""
         # Проверяем, все ли ингредиенты обработаны
         if not all(self.cooking_flags.values()):
-            # Не все ингредиенты выбраны – считаем ошибкой
-            self.is_error = True
+            # Не все ингредиенты выбраны – ошибка
             self.error_counter.add_error()
-            # Визуально подсветим кнопку красным (на один кадр)
-            self.next_button.status = "wrong"
+            self.next_button.text = "Неверно. Попробуйте еще раз"
+
             return
 
         # Загружаем ожидаемый результат из scenarios.json (шаг 15)
@@ -1029,10 +1013,9 @@ class GameScene(Scene):
             # Всё правильно
             self.cooking_validation_passed = True
             self.next_button.text = "ДАЛЕЕ"
-            self.next_button.status = None  # сбросить возможное красное свечение
-            self.waiting_for_next = False  # кнопка "ДАЛЕЕ" уже активна
+            self.next_button.status = None
+            self.waiting_for_next = False
         else:
             # Неправильно
-            self.is_error = True
             self.error_counter.add_error()
-            self.next_button.status = "wrong"
+            self.next_button.text = "Неверно. Попробуйте еще раз"
