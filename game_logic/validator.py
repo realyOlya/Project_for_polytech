@@ -1,10 +1,11 @@
 import json
 from typing import Any, Dict, Union, List, Set
-
+from utils import resource_path
 
 class ActionValidator:
     def __init__(self, scenarios_path: str = "data/scenarios.json"):
-        with open(scenarios_path, 'r', encoding='utf-8') as f:
+        full_path = resource_path(scenarios_path)
+        with open(full_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
         self.actions = data.get("action", {})
 

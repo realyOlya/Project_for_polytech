@@ -9,13 +9,15 @@ from game_logic.scoring import ErrorCounter
 from game_logic.confirmation_handler import ConfirmationHandler
 from ui.dialog_box import DialogBox
 from ui.input_box import InputBox
+from utils import resource_path
 
 
 class GameScene(Scene):
     def __init__(self, scene_manager, state_manager):
         super().__init__(scene_manager, state_manager)
-        self.BASE_DIR = Path(__file__).resolve().parent.parent
+        self.BASE_DIR = resource_path("")
         self.DATA_DIR = self.BASE_DIR / "data"
+        self.ASSETS_DIR = self.BASE_DIR / "assets"
 
         with open(self.DATA_DIR / "items.json", "r", encoding="utf-8") as f:
             self.items = json.load(f)
@@ -30,7 +32,7 @@ class GameScene(Scene):
 
         self.show_help_window = False
         self.help_button = Button(20, 20, 40, 40, "?", None)
-        self.validator = ActionValidator("data/scenarios.json")
+        self.validator = ActionValidator(str(resource_path("data/scenarios.json")))
         self.error_counter = ErrorCounter()
         self.error_button = Button(SCREEN_WIDTH - 250, 10, 240, 36,
                                    f"Ошибок: {self.error_counter.count}", font_path=None)
