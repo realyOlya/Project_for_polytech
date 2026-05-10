@@ -10,7 +10,7 @@ from game_logic.confirmation_handler import ConfirmationHandler
 from ui.dialog_box import DialogBox
 from ui.input_box import InputBox
 from utils import resource_path
-
+import sys
 
 class GameScene(Scene):
     def __init__(self, scene_manager, state_manager):
@@ -758,7 +758,7 @@ class GameScene(Scene):
     @staticmethod
     def show_end_screen():
         pygame.quit()
-        exit()
+        sys.exit()
 
     def _start_cooking_overlay(self, ingredient):
         self.overlay_active = True
