@@ -19,6 +19,7 @@ class GameScene(Scene):
         self.DATA_DIR = self.BASE_DIR / "data"
         self.ASSETS_DIR = self.BASE_DIR / "assets"
 
+
         with open(self.DATA_DIR / "items.json", "r", encoding="utf-8") as f:
             self.items = json.load(f)
         with open(self.DATA_DIR / "image.json", "r", encoding="utf-8") as f:
