@@ -11,3 +11,4 @@ class ErrorCounter:
     @property
     def count(self) -> int:
         return self._count
+

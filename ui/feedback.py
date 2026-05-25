@@ -40,3 +40,4 @@ class Feedback:
             text_surf.set_alpha(max(0, alpha))
         text_rect = text_surf.get_rect(center=(self.x, self.y))
         surface.blit(text_surf, text_rect)
+

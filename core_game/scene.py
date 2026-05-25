@@ -11,3 +11,4 @@ class Scene:
 
     def draw(self, screen):
         pass
+

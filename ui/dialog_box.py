@@ -78,3 +78,4 @@ class DialogBox:
     def set_wrong(self):
         self.status = 'wrong'
         self.wrong_timer = time.time()
+

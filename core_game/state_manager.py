@@ -18,3 +18,4 @@ class StateManager:
         with open(filepath, 'r', encoding='utf-8') as f:
             self.progress = json.load(f)
         return self.progress.get("current_step", "1")
+

@@ -65,3 +65,4 @@ class Button:
         self.status = None
         self.is_hovered = False
         self.wrong_timer = 0
+

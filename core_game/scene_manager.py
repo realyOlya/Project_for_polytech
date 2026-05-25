@@ -12,3 +12,4 @@ class SceneManager:
 
     def get_current_scene(self):
         return self.current_scene
+

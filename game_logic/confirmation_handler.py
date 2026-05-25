@@ -21,3 +21,4 @@ class ConfirmationHandler:
         self.is_waiting = False
         self.pending_choice = None
         self.on_confirm_callback = None
+

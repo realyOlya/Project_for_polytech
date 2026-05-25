@@ -893,3 +893,4 @@ class GameScene(Scene):
         else:
             self.error_counter.add_error()
             self.next_button.text = "Неверно. Попробуйте еще раз"
+

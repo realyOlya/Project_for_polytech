@@ -44,3 +44,4 @@ class InputBox:
         pygame.draw.rect(screen, border_color, self.rect, 2, border_radius=10)
         screen.blit(self.txt_surface,
                     (self.rect.x + 10, self.rect.y + (self.rect.h - self.txt_surface.get_height()) // 2))
+
