@@ -9,3 +9,7 @@ class SceneManager:
     def switch_to(self, name):
         if name in self.scenes:
             self.current_scene = self.scenes[name]
+
+    def get_current_scene(self):
+        return self.current_scene
+
