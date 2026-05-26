@@ -461,9 +461,9 @@ class GameScene(Scene):
             self.showing_results = True
             return
 
+
         if self.showing_results:
-            if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN:
-                self.show_end_screen()
+
             return
 
     def check_answer(self, idx, text):
@@ -712,9 +712,30 @@ class GameScene(Scene):
             self._draw_overlay(screen)
 
     def _draw_results(self, screen):
+        # Рисуем фон (последнюю картинку)
+        if self.bg_image:
+            screen.blit(self.bg_image, (0, 0))
+            if self.extra_image:
+                screen.blit(self.extra_image, self.extra_image_pos)
+            if self.char_image:
+                hero_rect_w, hero_rect_h, hero_rect_x, hero_rect_y = 320, 660, 50, 40
+                pygame.draw.rect(screen, (255, 255, 255),
+                                 (hero_rect_x, hero_rect_y, hero_rect_w, hero_rect_h),
+                                 border_radius=20)
+                target_h = int(hero_rect_h * 0.95)
+                aspect_ratio = self.char_image.get_width() / self.char_image.get_height()
+                target_w = int(target_h * aspect_ratio)
+                scaled_char = pygame.transform.smoothscale(self.char_image, (target_w, target_h))
+                screen.blit(scaled_char,
+                            (hero_rect_x + (hero_rect_w - target_w) // 2,
+                             hero_rect_y + (hero_rect_h - target_h) // 2))
+
+        # Полупрозрачный оверлей
         overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, 180))
         screen.blit(overlay, (0, 0))
+
+        # Белое окно с результатами
         box_w, box_h = 600, 400
         box_rect = pygame.Rect(
             (SCREEN_WIDTH - box_w) // 2,
@@ -723,15 +744,20 @@ class GameScene(Scene):
         )
         pygame.draw.rect(screen, (255, 255, 255), box_rect, border_radius=20)
         pygame.draw.rect(screen, (0, 0, 0), box_rect, 2, border_radius=20)
+
+        # Текст результатов
         player_name = self.state_manager.progress.get("player_name", "Игрок")
         name_surf = self.font_medium.render(f"Имя: {player_name}", True, (0, 0, 0))
         screen.blit(name_surf, (box_rect.x + 50, box_rect.y + 50))
+
         errors_surf = self.font_medium.render(
             f"Количество ошибок: {self.error_counter.count}", True, (0, 0, 0)
         )
         screen.blit(errors_surf, (box_rect.x + 50, box_rect.y + 120))
+
+        # Подсказка
         hint_surf = self.font_small.render(
-            "Нажмите в любом месте, чтобы закрыть программу", True, (120, 120, 120)
+            "Закройте окно, чтобы выйти из игры", True, (120, 120, 120)
         )
         screen.blit(hint_surf, (box_rect.x + 50, box_rect.y + box_h - 60))
 
